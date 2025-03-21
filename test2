@@ -1052,3 +1052,33 @@ Try this and let me know if it helps! 🚀
 </plugin>
 
 
+
+
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<jxb:bindings version="2.1"
+    xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    
+    <jxb:bindings schemaLocation="xsd/a.xsd" node="/xs:schema">
+        <jxb:schemaBindings>
+            <jxb:package name="com.example.model.a"/>
+        </jxb:schemaBindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="xsd/b.xsd" node="/xs:schema">
+        <jxb:schemaBindings>
+            <jxb:package name="com.example.model.b"/>
+        </jxb:schemaBindings>
+    </jxb:bindings>
+
+    <jxb:bindings schemaLocation="xsd/c.xsd" node="/xs:schema">
+        <jxb:schemaBindings>
+            <jxb:package name="com.example.model.c"/>
+        </jxb:schemaBindings>
+    </jxb:bindings>
+
+</jxb:bindings>
+
