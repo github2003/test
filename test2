@@ -391,7 +391,80 @@ Replace:
 1. Verify the artifact is visible in JFrog.
 2. Ensure your **Maven settings** allow fetching from your JFrog Artifactory.
 
-Let me know if you need help with any step! 🚀
+Let me know if you need help with any step! 
+
+
+No, this step alone **is not enough** because:  
+
+1. **Incorrect `<mirrorOf>` Value**  
+   - The `<mirrorOf>` tag should match a **repository ID**, not a specific plugin.  
+   - Since your corporate Maven setup forces JFrog for all dependencies, Maven will still try to fetch it from JFrog.
+
+2. **JAXB Maven Plugin Might Not Be in Maven Central**  
+   - You should check whether `jaxb-maven-plugin` version **1.1.0** is actually available in `http://repo.maven.apache.org/maven2`.  
+   - If it’s not there, this mirror rule won’t help.
+
+---
+
+## **What You Need to Do Instead**
+### **1. Override JFrog Completely for Plugins**
+Modify your `settings.xml` file to **ensure that Maven uses the central repository for all plugins**, not just JAXB:
+
+```xml
+<mirrors>
+    <mirror>
+        <id>central-repo</id>
+        <mirrorOf>*,!jfrog-repo</mirrorOf>
+        <url>https://repo.maven.apache.org/maven2</url>
+        <layout>default</layout>
+    </mirror>
+</mirrors>
+```
+📌 **Why this works?**
+- `mirrorOf="*,!jfrog-repo"` ensures **all dependencies come from Maven Central**, except ones in JFrog.  
+- If you have an explicit repository named `jfrog-repo`, it won't be overridden.
+
+---
+
+### **2. Manually Install JAXB Plugin Locally (Recommended)**
+Since your JFrog **does not have the required JAXB plugin**, you can manually install it locally:
+
+```sh
+mvn install:install-file \
+   -DgroupId=org.glassfish.jaxb \
+   -DartifactId=jaxb-maven-plugin \
+   -Dversion=1.1.0 \
+   -Dpackaging=jar \
+   -Dfile=/path/to/jaxb-maven-plugin-1.1.0.jar
+```
+Then, run Maven **offline** to avoid JFrog lookup:
+```sh
+mvn clean install -o
+```
+
+---
+
+### **3. Upload to JFrog (If Required)**
+If your company **forces you to use JFrog**, you **must** upload the JAR file manually. Let me know if you need help with this.
+
+---
+
+## **Final Check**
+After applying these steps:
+```sh
+mvn clean install -U
+```
+If it still searches JFrog, your corporate **settings.xml** is overriding everything. In that case, you need **IT/admin access** to modify JFrog rules.
+
+---
+
+### **TL;DR**
+- ✅ Your `<mirrors>` section alone **is NOT enough**  
+- ✅ Manually install JAXB **locally** (`mvn install:install-file`)  
+- ✅ Modify `settings.xml` to avoid forced JFrog lookups  
+- ✅ If forced, **upload JAR to JFrog**  
+
+Try these, and let me know what works! 🚀
 
 
 
