@@ -158,6 +158,50 @@ mvn clean compile
 
 
 
+java 17
+
+<dependencies>
+    <!-- JAXB API -->
+    <dependency>
+        <groupId>jakarta.xml.bind</groupId>
+        <artifactId>jakarta.xml.bind-api</artifactId>
+        <version>4.0.0</version>
+    </dependency>
+
+    <!-- JAXB Implementation -->
+    <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>4.0.4</version>
+    </dependency>
+</dependencies>
+
+
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-maven-plugin</artifactId>
+            <version>4.0.4</version>
+            <executions>
+                <execution>
+                    <id>xsd-to-java</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+                <outputDirectory>src/main/java</outputDirectory>
+                <packageName>com.example.model</packageName>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+
 
 
 
