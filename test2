@@ -810,3 +810,79 @@ To generate JAXB classes from **each XSD in a separate package**, modify the **`
 mvn clean compile
 ```
 Now, your JAXB **Java classes will be generated in separate packages!** 🚀
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxb2-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+                <!-- 837P XSD -->
+                <execution>
+                    <id>xjc-837p</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                    <configuration>
+                        <schemaDirectory>${project.basedir}/src/main/resources/xsd</schemaDirectory>
+                        <schemas>
+                            <schema>837p.xsd</schema>
+                        </schemas>
+                        <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+                        <packageName>com.example.model.edi837p</packageName>
+                        <arguments>
+                            <argument>-no-module-info</argument>
+                            <argument>-npa</argument>
+                            <argument>-autoNameResolution</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+
+                <!-- 837I XSD -->
+                <execution>
+                    <id>xjc-837i</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                    <configuration>
+                        <schemaDirectory>${project.basedir}/src/main/resources/xsd</schemaDirectory>
+                        <schemas>
+                            <schema>837i.xsd</schema>
+                        </schemas>
+                        <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+                        <packageName>com.example.model.edi837i</packageName>
+                        <arguments>
+                            <argument>-no-module-info</argument>
+                            <argument>-npa</argument>
+                            <argument>-autoNameResolution</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+
+                <!-- 837D XSD -->
+                <execution>
+                    <id>xjc-837d</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                    <configuration>
+                        <schemaDirectory>${project.basedir}/src/main/resources/xsd</schemaDirectory>
+                        <schemas>
+                            <schema>837d.xsd</schema>
+                        </schemas>
+                        <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+                        <packageName>com.example.model.edi837d</packageName>
+                        <arguments>
+                            <argument>-no-module-info</argument>
+                            <argument>-npa</argument>
+                            <argument>-autoNameResolution</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+
