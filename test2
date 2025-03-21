@@ -884,5 +884,37 @@ Now, your JAXB **Java classes will be generated in separate packages!** 🚀
             </executions>
         </plugin>
     </plugins>
+
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxb2-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+                <execution>
+                    <id>xjc</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                    <configuration>
+                        <schemaIncludes>
+                            <schemaInclude>*.xsd</schemaInclude>
+                        </schemaIncludes>
+                        <generateDirectory>${project.basedir}/src/main/java</generateDirectory>
+                        <packageName>com.example.model</packageName>
+                        <arguments>
+                            <argument>-no-module-info</argument>
+                            <argument>-npa</argument>
+                            <argument>-autoNameResolution</argument>
+                        </arguments>
+                    </configuration>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+
 </build>
 
