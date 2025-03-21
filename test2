@@ -684,3 +684,34 @@ But this will **require modifying generated files**, so **the `JAXBElement` meth
 ✅ **If modifying generated classes is an option**, manually add `@XmlRootElement`.  
 
 Now your **JAXB parser will work smoothly!** 🚀 Let me know if you need further clarification.
+
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>jaxb2-maven-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+                <execution>
+                    <id>xjc</id>
+                    <goals>
+                        <goal>xjc</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <schemas>
+                    <schema>${project.basedir}/src/main/resources/xsd/schema.xsd</schema>
+                </schemas>
+                <outputDirectory>${project.basedir}/src/main/java</outputDirectory>
+                <packageName>com.example.model</packageName>
+                <arguments>
+                    <argument>-no-module-info</argument>  <!-- Prevent module-info.java -->
+                    <argument>-npa</argument>  <!-- Prevent package-info.java -->
+                    <argument>-autoNameResolution</argument>  <!-- Resolve name conflicts -->
+                </arguments>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
