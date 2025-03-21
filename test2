@@ -917,4 +917,105 @@ Now, your JAXB **Java classes will be generated in separate packages!** 🚀
 </build>
 
 </build>
+##########################################
+
+
+Since all three XSDs have the same root element name (`Transaction-837`), the JAXB XJC tool is processing them separately and resolving conflicts multiple times. This significantly increases processing time.  
+
+---
+
+## **Optimizations to Reduce XJC Generation Time**
+### ✅ **1. Use a Single XJC Execution for All XSDs**
+Instead of running XJC three times separately, you can **combine all XSDs into a single execution**:  
+**Modify `pom.xml` like this:**
+```xml
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>jaxb2-maven-plugin</artifactId>
+    <version>3.1.0</version>
+    <executions>
+        <execution>
+            <id>xjc</id>
+            <goals>
+                <goal>xjc</goal>
+            </goals>
+            <configuration>
+                <schemaDirectory>${project.basedir}/src/main/resources/xsd</schemaDirectory>
+                <schemaIncludes>
+                    <schemaInclude>837p.xsd</schemaInclude>
+                    <schemaInclude>837i.xsd</schemaInclude>
+                    <schemaInclude>837d.xsd</schemaInclude>
+                </schemaIncludes>
+                <generateDirectory>${project.basedir}/src/main/java</generateDirectory>
+                <packageName>com.example.model</packageName>
+                <forceRegenerate>true</forceRegenerate>
+                <args>
+                    <arg>-no-module-directories</arg>
+                    <arg>-npa</arg>
+                    <arg>-XautoNameResolution</arg>
+                </args>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+```
+### **✅ 2. Reduce Naming Conflicts**
+If JAXB is **auto-resolving conflicting element names**, it may slow down processing. Try explicitly renaming the generated classes using XJB bindings.  
+
+➡ **Create a binding file (`src/main/resources/bindings.xjb`)**
+```xml
+<jxb:bindings version="2.1"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <jxb:bindings schemaLocation="837p.xsd">
+        <jxb:schemaBindings>
+            <jxb:package name="com.example.model.p"/>
+        </jxb:schemaBindings>
+    </jxb:bindings>
+    <jxb:bindings schemaLocation="837i.xsd">
+        <jxb:schemaBindings>
+            <jxb:package name="com.example.model.i"/>
+        </jxb:schemaBindings>
+    </jxb:bindings>
+    <jxb:bindings schemaLocation="837d.xsd">
+        <jxb:schemaBindings>
+            <jxb:package name="com.example.model.d"/>
+        </jxb:schemaBindings>
+    </jxb:bindings>
+</jxb:bindings>
+```
+Now modify the `pom.xml` to use this binding file:
+```xml
+<configuration>
+    <schemaDirectory>${project.basedir}/src/main/resources/xsd</schemaDirectory>
+    <bindingFiles>
+        <bindingFile>${project.basedir}/src/main/resources/bindings.xjb</bindingFile>
+    </bindingFiles>
+</configuration>
+```
+This will ensure that each schema gets a separate package, **avoiding auto-resolution conflicts**.
+
+---
+
+### **✅ 3. Enable Parallel Execution**
+If you have **multiple CPU cores**, enable parallel execution to speed up XJC:
+```xml
+<configuration>
+    <args>
+        <arg>-XautoNameResolution</arg>
+        <arg>-Dparallel=true</arg>
+    </args>
+</configuration>
+```
+Now, `mvn clean compile` should run **much faster** 🚀.
+
+---
+
+## **🎯 Final Outcome**
+✔ **All three XSDs are processed in a single execution**  
+✔ **Naming conflicts are avoided**  
+✔ **Separate packages for different schemas**  
+✔ **Faster processing by enabling parallel execution**
+
+Try this and let me know if it helps! 🚀
 
