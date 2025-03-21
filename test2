@@ -298,6 +298,101 @@ org.glassfish.jaxb:jaxb-maven-plugin
 jakarta.xml.bind:jakarta.xml.bind-api
 org.glassfish.jaxb:jaxb-runtime
 
+To upload the **JAXB Maven Plugin (or any JAR)** to **JFrog Artifactory**, follow these steps:
+
+---
+
+### **1. Download the Required JARs**
+Since your corporate **JFrog Artifactory** does not have `org.glassfish.jaxb:jaxb-maven-plugin`, you'll need to manually download it.
+
+- **Latest JAXB Maven Plugin (MojoHaus)**
+  - Go to: [https://mvnrepository.com/artifact/org.codehaus.mojo/jaxb2-maven-plugin](https://mvnrepository.com/artifact/org.codehaus.mojo/jaxb2-maven-plugin)
+  - Select version **3.2.0** or any compatible one.
+  - Download the `.jar` file.
+
+- **JAXB Dependencies (if needed)**
+  - Download any missing dependencies for JAXB runtime:
+    - [https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api](https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api)
+    - [https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime](https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime)
+
+---
+
+### **2. Upload JAR to JFrog Artifactory**
+#### **Option 1: Upload via Web UI**
+1. **Log in to JFrog Artifactory**
+   - Open your corporate JFrog URL in a browser.
+   - Enter your credentials.
+
+2. **Navigate to the Repository**
+   - Go to **Artifacts** → Find your **Virtual Plugin Repository** (or **Maven Local Repository**).
+
+3. **Upload the File**
+   - Click **Deploy** (or "Upload" in some versions).
+   - Select **"Artifact Upload"**.
+   - Click **"Browse"** and select the downloaded JAR file.
+   - Ensure you select the **correct repository** (e.g., `libs-release-local` or `plugins-repo`).
+
+4. **Set GAV Coordinates (if required)**
+   - Some Artifactory setups require you to manually enter:
+     - **Group ID**: `org.glassfish.jaxb`
+     - **Artifact ID**: `jaxb-maven-plugin`
+     - **Version**: `1.1.0` (or the version found in your repo)
+     - **Packaging**: `jar`
+
+5. **Click Deploy**
+   - Once uploaded, confirm that the artifact is available.
+
+---
+
+### **3. Configure Your Maven `pom.xml`**
+Once the JAR is uploaded, update your `pom.xml` to fetch it from JFrog instead of Maven Central.
+
+```xml
+<pluginRepositories>
+    <pluginRepository>
+        <id>jfrog-plugins</id>
+        <url>https://your-company.jfrog.io/artifactory/your-plugin-repo</url>
+    </pluginRepository>
+</pluginRepositories>
+
+<dependencies>
+    <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-maven-plugin</artifactId>
+        <version>1.1.0</version>
+    </dependency>
+</dependencies>
+```
+
+---
+
+### **4. Verify & Use**
+- Run:
+  ```sh
+  mvn clean compile
+  ```
+- This should now **fetch JAXB from JFrog** and generate Java classes from your XSD.
+
+---
+
+### **Alternative: Upload via cURL**
+If you prefer command-line:
+```sh
+curl -u username:password -X PUT "https://your-company.jfrog.io/artifactory/libs-release-local/org/glassfish/jaxb/jaxb-maven-plugin/1.1.0/jaxb-maven-plugin-1.1.0.jar" -T jaxb-maven-plugin-1.1.0.jar
+```
+
+Replace:
+- `username:password` → Your JFrog credentials.
+- `libs-release-local` → Your target repository.
+
+---
+
+### **Final Steps**
+1. Verify the artifact is visible in JFrog.
+2. Ensure your **Maven settings** allow fetching from your JFrog Artifactory.
+
+Let me know if you need help with any step! 🚀
+
 
 
 
