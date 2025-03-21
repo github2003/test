@@ -1082,3 +1082,69 @@ Try this and let me know if it helps! 🚀
 
 </jxb:bindings>
 
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+<plugin>
+  <groupId>org.codehaus.mojo</groupId>
+  <artifactId>jaxb2-maven-plugin</artifactId>
+  <version>3.1.0</version>
+  <executions>
+    <!-- Execution for a.xsd -->
+    <execution>
+      <id>xjc-a</id>
+      <goals>
+        <goal>xjc</goal>
+      </goals>
+      <configuration>
+        <sources>
+          <source>${project.basedir}/src/main/resources/xsd/a.xsd</source>
+        </sources>
+        <outputDirectory>${project.build.directory}/generated-sources/xjc/a</outputDirectory>
+        <packageName>com.example.model.a</packageName>
+        <clearOutputDirectory>true</clearOutputDirectory>
+        <args>
+          <arg>-XautoNameResolution</arg>
+        </args>
+      </configuration>
+    </execution>
+
+    <!-- Execution for b.xsd -->
+    <execution>
+      <id>xjc-b</id>
+      <goals>
+        <goal>xjc</goal>
+      </goals>
+      <configuration>
+        <sources>
+          <source>${project.basedir}/src/main/resources/xsd/b.xsd</source>
+        </sources>
+        <outputDirectory>${project.build.directory}/generated-sources/xjc/b</outputDirectory>
+        <packageName>com.example.model.b</packageName>
+        <clearOutputDirectory>true</clearOutputDirectory>
+        <args>
+          <arg>-XautoNameResolution</arg>
+        </args>
+      </configuration>
+    </execution>
+
+    <!-- Execution for c.xsd -->
+    <execution>
+      <id>xjc-c</id>
+      <goals>
+        <goal>xjc</goal>
+      </goals>
+      <configuration>
+        <sources>
+          <source>${project.basedir}/src/main/resources/xsd/c.xsd</source>
+        </sources>
+        <outputDirectory>${project.build.directory}/generated-sources/xjc/c</outputDirectory>
+        <packageName>com.example.model.c</packageName>
+        <clearOutputDirectory>true</clearOutputDirectory>
+        <args>
+          <arg>-XautoNameResolution</arg>
+        </args>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
