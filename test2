@@ -205,3 +205,43 @@ java 17
 
 
 
+
+<plugin>
+    <groupId>org.glassfish.jaxb</groupId>
+    <artifactId>jaxb-maven-plugin</artifactId>
+    <version>4.0.4</version>
+    <executions>
+        <execution>
+            <id>837p</id>
+            <goals><goal>xjc</goal></goals>
+            <configuration>
+                <schemaFiles>837p.xsd</schemaFiles>
+                <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+                <outputDirectory>src/main/java</outputDirectory>
+                <packageName>com.example.model.edi837p</packageName>
+            </configuration>
+        </execution>
+        <execution>
+            <id>837i</id>
+            <goals><goal>xjc</goal></goals>
+            <configuration>
+                <schemaFiles>837i.xsd</schemaFiles>
+                <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+                <outputDirectory>src/main/java</outputDirectory>
+                <packageName>com.example.model.edi837i</packageName>
+            </configuration>
+        </execution>
+        <execution>
+            <id>837d</id>
+            <goals><goal>xjc</goal></goals>
+            <configuration>
+                <schemaFiles>837d.xsd</schemaFiles>
+                <schemaDirectory>src/main/resources/xsd</schemaDirectory>
+                <outputDirectory>src/main/java</outputDirectory>
+                <packageName>com.example.model.edi837d</packageName>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+
+
