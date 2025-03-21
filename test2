@@ -294,5 +294,10 @@ java 17
     </build>
 </project>
 
+org.glassfish.jaxb:jaxb-maven-plugin
+jakarta.xml.bind:jakarta.xml.bind-api
+org.glassfish.jaxb:jaxb-runtime
+
+
 
 
