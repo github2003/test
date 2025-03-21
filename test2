@@ -579,3 +579,108 @@ public class XMLParser {
     }
 }
 
+
+Since your generated classes don't have `@XmlRootElement`, the JAXB parser needs additional configuration. Here’s how to fix the issue step by step.  
+
+---
+
+## **🚀 Step 1: Verify the Issue**  
+If `@XmlRootElement` is missing from your generated Java classes, JAXB may not recognize the root element automatically. You’ll see an error like:
+
+```
+javax.xml.bind.JAXBException: unknown class app
+```
+
+This happens when JAXB does not know **which class to use as the root**.
+
+---
+
+## **✅ Step 2: Fix the Issue by Using `JAXBElement`**
+When `@XmlRootElement` is missing, you can use `JAXBElement` to specify the root element **manually**.
+
+### **🔹 Fix: Use `ObjectFactory`**
+If you check your **generated code**, there will be a class called **`ObjectFactory.java`** inside the package.  
+
+It contains methods like:
+```java
+@XmlRegistry
+public class ObjectFactory {
+    public Claim837P createClaim837P() {
+        return new Claim837P();
+    }
+
+    @XmlElementDecl(namespace = "", name = "Claim837P")
+    public JAXBElement<Claim837P> createClaim837P(Claim837P value) {
+        return new JAXBElement<>(new QName("", "Claim837P"), Claim837P.class, null, value);
+    }
+}
+```
+
+Now, update your **XML parser** to use `JAXBElement`:
+
+```java
+import jakarta.xml.bind.*;
+import javax.xml.namespace.QName;
+import java.io.File;
+
+public class XMLParser {
+    public static void main(String[] args) throws JAXBException {
+        File xmlFile = new File("837p.xml"); // Your input XML
+
+        // Use generated classes
+        JAXBContext context = JAXBContext.newInstance(Claim837P.class, ObjectFactory.class);
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+
+        // Read XML into Java object
+        JAXBElement<Claim837P> root = unmarshaller.unmarshal(new StreamSource(xmlFile), Claim837P.class);
+        Claim837P claim = root.getValue();
+
+        System.out.println("Parsed Root: " + claim);
+    }
+}
+```
+
+---
+
+## **✅ Step 3: Ensure Your `module-info.java` is Correct**
+Since you’re using **Java 17+**, your project may require proper module definitions.  
+
+If you see:
+```
+unknown module app
+```
+Check if you have `module-info.java`. If yes, update it:
+
+```java
+module com.example.app {
+    requires jakarta.xml.bind;
+    opens com.example.model to jakarta.xml.bind;
+}
+```
+
+If you **don’t have `module-info.java`**, you **can ignore this step**.
+
+---
+
+## **✅ Step 4: Alternative - Manually Add `@XmlRootElement`**
+If you **don’t want to use `JAXBElement`**, add `@XmlRootElement` manually to your generated Java class:
+
+```java
+import jakarta.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "Claim837P")
+public class Claim837P {
+    // Fields and methods
+}
+```
+
+But this will **require modifying generated files**, so **the `JAXBElement` method is better**.
+
+---
+
+## **🚀 Final Summary**
+✅ **If `@XmlRootElement` is missing**, use `JAXBElement` and `ObjectFactory` to parse.  
+✅ **Ensure `module-info.java` is correctly configured** if using Java 17+.  
+✅ **If modifying generated classes is an option**, manually add `@XmlRootElement`.  
+
+Now your **JAXB parser will work smoothly!** 🚀 Let me know if you need further clarification.
