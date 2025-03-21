@@ -469,3 +469,92 @@ Try these, and let me know what works! 🚀
 
 
 
+
+Yes, you can pass additional parameters to `xjc` to **automatically resolve duplicate elements** and avoid the `A class/interface with the same name already exists` error. Try the following solutions:
+
+---
+
+## **Solution 1: Use `-XautoNameResolution`**
+This option **automatically renames conflicting classes/interfaces** during XSD compilation.  
+
+### **Command:**
+```sh
+xjc -d src/main/java -p com.example.model -XautoNameResolution schema.xsd
+```
+
+### **For Maven Plugin:**
+Modify `pom.xml` to include:
+```xml
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>jaxb2-maven-plugin</artifactId>
+    <version>2.5.0</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+        </execution>
+    </executions>
+    <configuration>
+        <schemaDirectory>${project.basedir}/src/main/resources</schemaDirectory>
+        <generateDirectory>${project.build.directory}/generated-sources/xjc</generateDirectory>
+        <args>
+            <arg>-XautoNameResolution</arg>
+        </args>
+    </configuration>
+</plugin>
+```
+👉 **Try this first!**  
+
+---
+
+## **Solution 2: Use `-npa` (No Package Level Annotations)**
+If your XSD elements **generate duplicate names because of JAXB annotations**, try:  
+```sh
+xjc -d src/main/java -p com.example.model -npa schema.xsd
+```
+This removes `@XmlAccessorType(XmlAccessType.FIELD)` at the package level.
+
+---
+
+## **Solution 3: Use `-no-header` (Optional)**
+If you’re running `xjc` multiple times and getting errors due to duplicate class declarations, try:
+```sh
+xjc -d src/main/java -p com.example.model -no-header schema.xsd
+```
+This prevents unnecessary JAXB-generated comments that might cause conflicts.
+
+---
+
+## **Solution 4: Use Binding File (`.xjb`) to Rename Conflicting Elements**
+If the above methods fail, create an **explicit binding file** (`bindings.xjb`) to rename elements manually:
+
+### **Example `bindings.xjb`**
+```xml
+<jaxb:bindings version="2.1"
+    xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    
+    <jaxb:bindings schemaLocation="schema.xsd">
+        <jaxb:bindings node="//xsd:element[@name='DuplicateElementName']">
+            <jaxb:class name="NewClassName"/>
+        </jaxb:bindings>
+    </jaxb:bindings>
+
+</jaxb:bindings>
+```
+
+### **Run `xjc` with Binding File**
+```sh
+xjc -d src/main/java -p com.example.model -b bindings.xjb schema.xsd
+```
+
+---
+
+### **Final Recommendation**
+1️⃣ **Try `-XautoNameResolution` first** ✅  
+2️⃣ If still failing, use `-npa` or `-no-header`  
+3️⃣ If necessary, use **binding files** to manually rename conflicts  
+
+Let me know if you need further debugging! 🚀
