@@ -558,3 +558,24 @@ xjc -d src/main/java -p com.example.model -b bindings.xjb schema.xsd
 3️⃣ If necessary, use **binding files** to manually rename conflicts  
 
 Let me know if you need further debugging! 🚀
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
+import java.io.File;
+
+public class XMLParser {
+    public static void main(String[] args) throws JAXBException {
+        File xmlFile = new File("837p.xml"); // Your input XML file
+
+        // Determine root class based on XSD
+        JAXBContext context = JAXBContext.newInstance(Claim837P.class);
+        Unmarshaller unmarshaller = context.createUnmarshaller();
+
+        // Parse XML into Java object
+        Claim837P claim = (Claim837P) unmarshaller.unmarshal(xmlFile);
+
+        System.out.println("Parsed Root: " + claim);
+    }
+}
+
