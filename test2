@@ -1386,5 +1386,39 @@ public class XmlToJavaParser {
         System.out.println("Parsed Claim: " + claim);
     }
 }
+import jakarta.xml.bind.*;
+import jakarta.xml.bind.annotation.XmlElementDecl;
+import java.io.StringReader;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.xml.namespace.QName;
+
+public class XmlToJavaParser {
+    // Cache for JAXBContext (Performance Optimization)
+    private static final ConcurrentHashMap<Class<?>, JAXBContext> JAXB_CONTEXT_CACHE = new ConcurrentHashMap<>();
+
+    private static JAXBContext getJAXBContext(Class<?> clazz) throws JAXBException {
+        return JAXB_CONTEXT_CACHE.computeIfAbsent(clazz, key -> {
+            try {
+                return JAXBContext.newInstance(clazz);
+            } catch (JAXBException e) {
+                throw new RuntimeException("Error creating JAXBContext for " + clazz.getName(), e);
+            }
+        });
+    }
+
+    public static Claim837P parseXml(String xml) throws JAXBException {
+        JAXBContext jaxbContext = getJAXBContext(ObjectFactory.class); // Use ObjectFactory
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
+        JAXBElement<Claim837P> root = unmarshaller.unmarshal(new StreamSource(new StringReader(xml)), Claim837P.class);
+        return root.getValue();
+    }
+
+    public static void main(String[] args) throws JAXBException {
+        String xmlData = "<Transaction-837>...</Transaction-837>"; // Replace with actual XML
+        Claim837P claim = parseXml(xmlData);
+        System.out.println("Parsed Claim: " + claim);
+    }
+}
 
 
