@@ -1342,4 +1342,15 @@ public class FastXMLParser {
         return xmlMapper.readValue(new File(filePath), clazz);
     }
 }
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import java.io.File;
+
+public class FastXMLParser {
+    public static <T> T parseXML(String filePath, Class<T> clazz) throws Exception {
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.registerModule(new JaxbAnnotationModule()); // Enable JAXB annotations in Jackson
+        return xmlMapper.readValue(new File(filePath), clazz);
+    }
+}
 
