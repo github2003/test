@@ -1330,3 +1330,16 @@ If `xjc` generates **too many Java classes**, try:
 
 🚀 **Try these, and let me know if you need more help!**
 </build>
+
+
+
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
+public class FastXMLParser {
+    public static <T> T parseXML(String filePath, Class<T> clazz) throws Exception {
+        XmlMapper xmlMapper = new XmlMapper();
+        xmlMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        return xmlMapper.readValue(new File(filePath), clazz);
+    }
+}
+
