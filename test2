@@ -1354,3 +1354,37 @@ public class FastXMLParser {
     }
 }
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
+import java.io.StringReader;
+import java.util.concurrent.ConcurrentHashMap;
+
+public class XmlToJavaParser {
+    // Cache JAXBContext for performance
+    private static final ConcurrentHashMap<Class<?>, JAXBContext> JAXB_CONTEXT_CACHE = new ConcurrentHashMap<>();
+
+    private static JAXBContext getJAXBContext(Class<?> clazz) throws JAXBException {
+        return JAXB_CONTEXT_CACHE.computeIfAbsent(clazz, key -> {
+            try {
+                return JAXBContext.newInstance(key);
+            } catch (JAXBException e) {
+                throw new RuntimeException("Error creating JAXBContext for " + key, e);
+            }
+        });
+    }
+
+    public static <T> T parseXml(String xml, Class<T> clazz) throws JAXBException {
+        JAXBContext jaxbContext = getJAXBContext(clazz);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        return clazz.cast(unmarshaller.unmarshal(new StringReader(xml)));
+    }
+
+    public static void main(String[] args) throws JAXBException {
+        String xmlData = "<Claim837P>...</Claim837P>"; // Replace with actual XML
+        Claim837P claim = parseXml(xmlData, Claim837P.class);
+        System.out.println("Parsed Claim: " + claim);
+    }
+}
+
+
