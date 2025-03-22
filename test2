@@ -1678,3 +1678,93 @@ public class ClaimService {
   The parser uses the composite class array to create a JAXBContext, ensuring all necessary classes for unmarshalling are included.
 
 This approach keeps your code clean and maintainable, without the need to repeatedly specify fully qualified class names in your service logic.
+
+To map between your internal claimDetails object and the Swagger response object, you can use a mapping library like **MapStruct**. MapStruct generates mapping code at compile time, making it both fast and type-safe.
+
+---
+
+### **Steps to Map Using MapStruct**
+
+1. **Add MapStruct Dependencies to `pom.xml`:**
+
+   ```xml
+   <dependencies>
+       <!-- MapStruct API -->
+       <dependency>
+           <groupId>org.mapstruct</groupId>
+           <artifactId>mapstruct</artifactId>
+           <version>1.5.5.Final</version>
+       </dependency>
+       <!-- MapStruct Processor (annotation processor) -->
+       <dependency>
+           <groupId>org.mapstruct</groupId>
+           <artifactId>mapstruct-processor</artifactId>
+           <version>1.5.5.Final</version>
+           <scope>provided</scope>
+       </dependency>
+   </dependencies>
+   ```
+
+2. **Create a Mapper Interface:**
+
+   Define an interface that maps your internal claimDetails object (for example, `ClaimDetails`) to your Swagger response object (for example, `SwaggerClaimResponse`). Use MapStruct annotations to specify the mapping rules.
+
+   ```java
+   package com.example.mapper;
+
+   import org.mapstruct.Mapper;
+   import org.mapstruct.Mapping;
+   import org.mapstruct.factory.Mappers;
+
+   @Mapper
+   public interface ClaimMapper {
+       ClaimMapper INSTANCE = Mappers.getMapper(ClaimMapper.class);
+
+       // If the property names are the same, MapStruct maps them automatically.
+       // Otherwise, specify mappings explicitly.
+       @Mapping(source = "internalField1", target = "swaggerField1")
+       @Mapping(source = "internalField2", target = "swaggerField2")
+       SwaggerClaimResponse mapToSwagger(ClaimDetails claimDetails);
+   }
+   ```
+
+3. **Use the Mapper in Your Service:**
+
+   In your service class, after parsing the XML and obtaining the `claimDetails` object, call the mapper to convert it to the Swagger response object.
+
+   ```java
+   package com.example.service;
+
+   import com.example.mapper.ClaimMapper;
+   import com.example.model.ClaimDetails;
+   import com.example.swagger.SwaggerClaimResponse;
+   import org.springframework.stereotype.Service;
+
+   @Service
+   public class ClaimService {
+       public SwaggerClaimResponse processClaim(ClaimDetails claimDetails) {
+           // Map internal claimDetails to Swagger response object
+           SwaggerClaimResponse response = ClaimMapper.INSTANCE.mapToSwagger(claimDetails);
+           return response;
+       }
+   }
+   ```
+
+---
+
+### **Benefits of This Approach:**
+
+- **Type-Safe:** Mapping errors are caught at compile time.
+- **Fast:** MapStruct generates mapping code at build time, which means zero runtime overhead.
+- **Maintainable:** Changes to the object structures are easier to manage in a centralized mapping interface.
+- **Clean Code:** Your service code remains clean and focused on business logic.
+
+---
+
+### **Summary:**
+
+- **Add MapStruct dependencies** in your project.
+- **Create a mapping interface** with MapStruct to define how your internal model maps to your Swagger model.
+- **Use the generated mapper** in your service code to convert objects before sending the REST response.
+
+This approach ensures that your objects are mapped efficiently and in a maintainable way. Let me know if you need further details!
