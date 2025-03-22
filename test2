@@ -1422,3 +1422,56 @@ public class XmlToJavaParser {
 }
 
 
+import jakarta.xml.bind.*;
+import java.io.StringReader;
+import java.util.concurrent.ConcurrentHashMap;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.bind.JAXBElement;
+
+/**
+ * Service class for parsing XML into Java objects using JAXB.
+ * Implements caching of JAXBContext to improve performance.
+ */
+public class XmlToJavaParserService {
+    
+    /**
+     * Cache for storing JAXBContext instances for different Java classes.
+     * Used to avoid creating new JAXBContext instances repeatedly.
+     */
+    private final ConcurrentHashMap<Class<?>, JAXBContext> jaxbContextCache = new ConcurrentHashMap<>();
+
+    /**
+     * Retrieves a cached JAXBContext for a given class.
+     * If not present, creates a new instance and stores it in the cache.
+     * 
+     * @param clazz The class for which JAXBContext is needed
+     * @return The cached or newly created JAXBContext
+     * @throws JAXBException if JAXB initialization fails
+     */
+    private JAXBContext getJAXBContext(Class<?> clazz) throws JAXBException {
+        return jaxbContextCache.computeIfAbsent(clazz, key -> {  // Thread-safe cache update
+            try {
+                return JAXBContext.newInstance(clazz); // Creates JAXBContext if not already cached
+            } catch (JAXBException e) {
+                throw new RuntimeException("Error creating JAXBContext for " + clazz.getName(), e);
+            }
+        });
+    }
+
+    /**
+     * Parses an XML string into a Java object of type Claim837P.
+     * Uses JAXB to unmarshall the XML content.
+     * 
+     * @param xml The XML string to be parsed
+     * @return The Java object representation of the XML
+     * @throws JAXBException if parsing fails
+     */
+    public Claim837P parseXml(String xml) throws JAXBException {
+        JAXBContext jaxbContext = getJAXBContext(ObjectFactory.class); // Uses cached JAXBContext
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();  // Creates unmarshaller
+
+        JAXBElement<Claim837P> root = unmarshaller.unmarshal(
+            new StreamSource(new StringReader(xml)), Claim837P.class);
+        return root.getValue();
+    }
+}
