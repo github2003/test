@@ -1547,3 +1547,134 @@ public class ClaimService {
 If your generated classes can share a common interface or superclass, you could further refine the mapping to return that common type. Otherwise, using an enum like this provides a clean and maintainable solution.
 
 Let me know if you need further adjustments or have additional questions!
+
+You can modify your enum to hold both classes—the main claim class and its corresponding ObjectFactory—by storing them in an array. Then your parser can use that composite array to create a JAXBContext. This way, even though they reside in different packages, you have a single enum entry that maps to both classes.
+
+Below is an example of how you can update your enum and use it in your parser.
+
+---
+
+### **1. Modified Enum with Composite Class Array**
+
+```java
+package com.example.mapping;
+
+public enum ClaimTypeMapping {
+    CLAIM_837P(
+        com.example.model.edi837p.Claim837P.class,
+        com.example.model.edi837p.ObjectFactory.class
+    ),
+    CLAIM_837I(
+        com.example.model.edi837i.Claim837P.class,
+        com.example.model.edi837i.ObjectFactory.class
+    ),
+    CLAIM_837D(
+        com.example.model.edi837d.Claim837P.class,
+        com.example.model.edi837d.ObjectFactory.class
+    );
+
+    // Array containing both the main class and its ObjectFactory
+    private final Class<?>[] jaxbClasses;
+
+    ClaimTypeMapping(Class<?> claimClass, Class<?> objectFactoryClass) {
+        this.jaxbClasses = new Class<?>[] { claimClass, objectFactoryClass };
+    }
+
+    public Class<?>[] getJaxbClasses() {
+        return jaxbClasses;
+    }
+}
+```
+
+---
+
+### **2. Using the Enum in Your Parser Service**
+
+Now, update your parser service to accept a ClaimTypeMapping enum value and use its composite class array when creating the JAXBContext.
+
+```java
+package com.example.service;
+
+import com.example.mapping.ClaimTypeMapping;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
+
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+
+public class XmlToJavaParserService {
+
+    /**
+     * Parses the XML into a Java object using the JAXB classes from the composite key.
+     *
+     * @param xml the XML string
+     * @param mapping the enum mapping that contains both the claim class and ObjectFactory
+     * @param <T> the type of the claim object
+     * @return the parsed Java object
+     * @throws JAXBException if an error occurs during unmarshalling
+     */
+    public <T> T parseXml(String xml, ClaimTypeMapping mapping) throws JAXBException {
+        // Create a JAXBContext using the composite class array
+        JAXBContext jaxbContext = JAXBContext.newInstance(mapping.getJaxbClasses());
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        
+        // Unmarshal using the main claim class from the mapping
+        JAXBElement<T> root = unmarshaller.unmarshal(
+            new StreamSource(new StringReader(xml)),
+            (Class<T>) mapping.getJaxbClasses()[0]
+        );
+        return root.getValue();
+    }
+}
+```
+
+---
+
+### **3. How to Use It in Your Service**
+
+With the above setup, you can simply refer to the enum instead of writing fully qualified class names in your service code:
+
+```java
+package com.example.service;
+
+import com.example.mapping.ClaimTypeMapping;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ClaimService {
+    private final XmlToJavaParserService xmlParserService;
+
+    public ClaimService(XmlToJavaParserService xmlParserService) {
+        this.xmlParserService = xmlParserService;
+    }
+
+    public void processClaim(String xml, String claimTypeIdentifier) {
+        // Convert the string identifier (e.g., "CLAIM_837P") to the enum
+        ClaimTypeMapping mapping = ClaimTypeMapping.valueOf(claimTypeIdentifier);
+        try {
+            Object claim = xmlParserService.parseXml(xml, mapping);
+            // Process the claim object as needed
+            System.out.println("Parsed claim: " + claim);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+---
+
+### **Summary**
+
+- **Composite Enum Key:**  
+  The enum now stores both the claim class and its ObjectFactory as an array. Even if they are in different packages, their fully qualified names are unique.
+
+- **Cleaner Service Code:**  
+  Your service code can refer to a simple enum value (e.g., `"CLAIM_837P"`) instead of using fully qualified class names everywhere.
+
+- **JAXBContext Creation:**  
+  The parser uses the composite class array to create a JAXBContext, ensuring all necessary classes for unmarshalling are included.
+
+This approach keeps your code clean and maintainable, without the need to repeatedly specify fully qualified class names in your service logic.
