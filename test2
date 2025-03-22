@@ -1475,3 +1475,75 @@ public class XmlToJavaParserService {
         return root.getValue();
     }
 }
+
+You can simplify your service code by mapping your claim types to their corresponding Class objects so you don't have to write the fully qualified name every time. One way to do this is to create a constants class or an enum that holds the mapping. For example:
+
+---
+
+### **Using an Enum for Claim Type Mapping**
+
+```java
+package com.example.mapping;
+
+public enum ClaimTypeMapping {
+    CLAIM_837P(com.example.model.edi837p.Claim837P.class),
+    CLAIM_837I(com.example.model.edi837i.Claim837P.class),
+    CLAIM_837D(com.example.model.edi837d.Claim837P.class);
+
+    private final Class<?> claimClass;
+
+    ClaimTypeMapping(Class<?> claimClass) {
+        this.claimClass = claimClass;
+    }
+
+    public Class<?> getClaimClass() {
+        return claimClass;
+    }
+}
+```
+
+---
+
+### **Usage in Your Service**
+
+In your service class, you can use the enum to look up the appropriate class for a given claim type:
+
+```java
+import com.example.mapping.ClaimTypeMapping;
+
+public class ClaimService {
+    private final XmlToJavaParserService xmlParserService;
+
+    public ClaimService(XmlToJavaParserService xmlParserService) {
+        this.xmlParserService = xmlParserService;
+    }
+
+    public void processClaim(String xml, String claimTypeIdentifier) {
+        // For example, claimTypeIdentifier can be "CLAIM_837P"
+        ClaimTypeMapping mapping = ClaimTypeMapping.valueOf(claimTypeIdentifier);
+        Class<?> claimClass = mapping.getClaimClass();
+        try {
+            // Cast to Object or a common interface if available
+            Object claim = xmlParserService.parseXml(xml, claimClass);
+            // Process claim...
+            System.out.println("Parsed claim: " + claim);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+---
+
+### **Benefits:**
+- **Cleaner Code:**  
+  You avoid hardcoding fully qualified class names in your service.
+- **Centralized Mapping:**  
+  All mappings are defined in one place (the enum), making it easier to update if needed.
+- **Flexibility:**  
+  You can easily add new claim types without changing the service logic.
+
+If your generated classes can share a common interface or superclass, you could further refine the mapping to return that common type. Otherwise, using an enum like this provides a clean and maintainable solution.
+
+Let me know if you need further adjustments or have additional questions!
