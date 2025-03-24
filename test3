@@ -1,0 +1,168 @@
+Since **removing sonar issues took 3 days**, you now have the following work left:  
+
+1. **Change Oracle to PostgreSQL**  
+2. **Modify file handling (NFS → S3 for input, final XML to S3)**  
+3. **Write JUnit tests**  
+4. **CI/CD setup using an existing template**  
+
+### **Effort Estimation for Remaining Work**  
+
+| Task | Estimated Time |
+|-------|---------------|
+| **Oracle → PostgreSQL** | **0.5 day** |
+| **Modify file handling (NFS → S3)** | **1.5 days** |
+| **Write JUnit tests** | **1 day** |
+| **CI/CD setup and testing** | **0.5 day** |
+
+➡ **Total Remaining Effort: ~3.5 days**  
+
+Since you've already **spent 3 days**, the overall effort for this ticket is around **6.5 days**, which is slightly high for a 3-point story. If needed, you can discuss increasing it to **5 points**.  
+
+---
+
+### **Updated Sub-Tasks & Details**  
+
+#### **1. Database Migration: Oracle → PostgreSQL (0.5 Day) → 0.5 SP**  
+- Modify queries and update connection properties.  
+- Ensure the transformed XML data is retrieved correctly.  
+✅ **Acceptance Criteria:**  
+- PostgreSQL integration is functional.  
+- All queries return expected data without errors.  
+
+---
+
+#### **2. Update File Handling (NFS → S3) (1.5 Days) → 1.5 SP**  
+- Read input files from **S3** instead of NFS.  
+- Ensure the final transformed XML is stored in **S3**.  
+✅ **Acceptance Criteria:**  
+- XML input files are read from S3.  
+- Final transformed XML is correctly written to S3.  
+
+---
+
+#### **3. Write JUnit Tests (1 Day) → 1 SP**  
+- Write test cases for **database interaction and file handling changes**.  
+✅ **Acceptance Criteria:**  
+- At least **80% coverage** for the modified code.  
+
+---
+
+#### **4. CI/CD Integration (0.5 Day) → 0.5 SP**  
+- Ensure the updated code is deployed via an existing **CI/CD template**.  
+✅ **Acceptance Criteria:**  
+- The application builds and deploys successfully.  
+
+---
+
+### **Main Ticket: Acceptance Criteria**  
+
+✅ **Oracle is replaced with PostgreSQL, and data retrieval works as expected.**  
+✅ **File handling is updated to use S3 instead of NFS.**  
+✅ **JUnit tests are added, and coverage is at least 80%.**  
+✅ **CI/CD pipeline builds and deploys successfully.**  
+✅ **No Sonar issues remain in the code.**  
+
+---
+
+Since you only have **~3.5 days of work left**, try to complete it within this sprint.  
+If this effort feels **too high for a 3-point story**, you can discuss increasing it to **5 points** with the team. 🚀
+
+
+
+
+
+
+###################################################################################################################
+
+
+Main Ticket: Extract RPA and Send Response
+Story Points: 5
+
+Description:
+Migrate the existing Oracle-based XML retrieval logic to PostgreSQL.
+
+Parse the retrieved XML using JAXB.
+
+Implement a mapper to transform parsed data into the Swagger response model.
+
+Write unit tests for all components.
+
+Integrate CI/CD pipeline for automated deployment.
+
+Acceptance Criteria:
+PostgreSQL connection is established and working.
+
+XML is retrieved successfully from the new database.
+
+XML parsing using JAXB is implemented correctly.
+
+Mapper correctly transforms data into the Swagger response model.
+
+Unit tests cover all major functionalities.
+
+CI/CD pipeline builds and deploys the service successfully.
+
+Sub-tasks:
+1. Analysis
+Understand the existing Oracle-based implementation.
+
+Identify PostgreSQL schema, tables, and queries required.
+
+Validate XML structure and transformation logic.
+
+Acceptance Criteria:
+
+Document the Oracle-to-PostgreSQL mapping.
+
+Identify required changes in XML processing.
+
+2. Database Connection and Code Changes
+Configure PostgreSQL connection in the application.
+
+Modify existing logic to fetch XML from PostgreSQL instead of Oracle.
+
+Validate retrieved XML against expected structure.
+
+Acceptance Criteria:
+
+Application successfully retrieves XML from PostgreSQL.
+
+No breaking changes in the existing flow.
+
+3. XML Parsing and Mapper Implementation
+Implement JAXB-based XML parsing.
+
+Develop a mapper to transform parsed data into Swagger response classes.
+
+Acceptance Criteria:
+
+XML is correctly converted into Java objects.
+
+Mapper correctly transforms parsed data into Swagger response format.
+
+4. Unit Testing
+Write unit tests for database fetching logic.
+
+Validate JAXB XML parsing through unit tests.
+
+Test mapper functionality with various XML inputs.
+
+Acceptance Criteria:
+
+Code coverage is at least 80%.
+
+All critical paths are tested.
+
+5. CI/CD Integration
+Update existing CI/CD pipeline to deploy the service.
+
+Ensure database migrations are handled if needed.
+
+Acceptance Criteria:
+
+CI/CD pipeline builds and deploys successfully.
+
+Service is up and running after deployment.
+
+
+
