@@ -900,3 +900,30 @@ public class FastXmlParser {
     }
 }
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import java.io.File;
+
+public class XmlParserFast {
+    public static void main(String[] args) {
+        try {
+            // Initialize Jackson's XML parser
+            XmlMapper xmlMapper = new XmlMapper();
+            
+            // Read XML file as a tree structure (JsonNode)
+            JsonNode rootNode = xmlMapper.readTree(new File("input.xml"));
+
+            // Extract "Element-329" inside "Segment_Se"
+            JsonNode elementNode = rootNode.at("/Segment_Se/Element-329");
+
+            // Print result
+            if (elementNode.isMissingNode()) {
+                System.out.println("Element not found!");
+            } else {
+                System.out.println("Element-329 inside Segment_Se: " + elementNode.asText());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
