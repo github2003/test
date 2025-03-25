@@ -208,4 +208,144 @@ public interface ClaimResponseMapping {
     }
 }
 
+Since `Transaction837` is in a **different package**, but we **cannot modify it**, we need a better approach. Instead of using a wrapper class inside your package, we should ensure that the **utility methods** or **mapping logic** work across different packages **without modifying `Transaction837`**.
 
+---
+
+### **✅ Solution: Use a Generic Abstract Mapper**
+We create a **base abstract class** (`AbstractClaimMapper`) that provides reusable logic. Then, different mapper implementations (`ProfessionalClaimMapper` and `DentalClaimMapper`) will extend it.
+
+---
+
+### **🔹 Step 1: Create the Abstract Base Class**
+Since `Transaction837` exists in different packages (`com.p.Transaction837` and `com.d.Transaction837`), we define an **abstract class** with a **generic type parameter**.
+
+```java
+public abstract class AbstractClaimMapper<T> {
+
+    protected String extractSubmitterId(T transaction837) {
+        if (transaction837 instanceof com.p.Transaction837 t) {
+            return getSubmitterIdFromTransaction(t);
+        } else if (transaction837 instanceof com.d.Transaction837 t) {
+            return getSubmitterIdFromTransaction(t);
+        }
+        return null;
+    }
+
+    protected String extractClaimId(T transaction837) {
+        if (transaction837 instanceof com.p.Transaction837 t) {
+            return getClaimIdFromTransaction(t);
+        } else if (transaction837 instanceof com.d.Transaction837 t) {
+            return getClaimIdFromTransaction(t);
+        }
+        return null;
+    }
+
+    private String getSubmitterIdFromTransaction(com.p.Transaction837 transaction837) {
+        if (transaction837.getInternalProperties() == null) return null;
+        List<DataStructure> dataStructures = transaction837.getInternalProperties().getDatastructures();
+        if (dataStructures == null) return null;
+
+        for (DataStructure ds : dataStructures) {
+            if (ds.getLookup() != null) {
+                for (Lookup lookup : ds.getLookup()) {
+                    if ("InterchangeSenderID".equals(lookup.getName())) {
+                        return lookup.getValue();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private String getClaimIdFromTransaction(com.p.Transaction837 transaction837) {
+        return (transaction837.getSegmentBHT() != null) ? transaction837.getSegmentBHT().getClaimId() : null;
+    }
+}
+```
+
+---
+
+### **🔹 Step 2: Create Specific Mappers for Different Packages**
+Now, create **two concrete mappers** that extend this base class.
+
+#### **Professional Claim Mapper**
+```java
+@Mapper(componentModel = "spring")
+public abstract class ProfessionalClaimMapper extends AbstractClaimMapper<com.p.Transaction837> {
+
+    @Mapping(target = "claimDetails", source = "transaction837", qualifiedByName = "mapClaimDetails")
+    public abstract ClaimDetailsReply toProfessionalClaimsDetails(com.p.Transaction837 transaction837);
+
+    @Named("mapClaimDetails")
+    public List<ClaimDetails> mapClaimDetails(com.p.Transaction837 transaction837) {
+        ClaimDetails claimDetails = new ClaimDetails();
+        claimDetails.setSubmitterid(extractSubmitterId(transaction837));
+        claimDetails.setClaimid(extractClaimId(transaction837));
+        return List.of(claimDetails);
+    }
+}
+```
+
+#### **Dental Claim Mapper**
+```java
+@Mapper(componentModel = "spring")
+public abstract class DentalClaimMapper extends AbstractClaimMapper<com.d.Transaction837> {
+
+    @Mapping(target = "claimDetails", source = "transaction837", qualifiedByName = "mapClaimDetails")
+    public abstract ClaimDetailsReply toDentalClaimsDetails(com.d.Transaction837 transaction837);
+
+    @Named("mapClaimDetails")
+    public List<ClaimDetails> mapClaimDetails(com.d.Transaction837 transaction837) {
+        ClaimDetails claimDetails = new ClaimDetails();
+        claimDetails.setSubmitterid(extractSubmitterId(transaction837));
+        claimDetails.setClaimid(extractClaimId(transaction837));
+        return List.of(claimDetails);
+    }
+}
+```
+
+---
+
+### **🔹 Step 3: Inject the Mappers in Your Service Class**
+In your **service class**, inject both `ProfessionalClaimMapper` and `DentalClaimMapper`.
+
+```java
+@Service
+public class ClaimService {
+
+    private final ProfessionalClaimMapper professionalClaimMapper;
+    private final DentalClaimMapper dentalClaimMapper;
+
+    @Autowired
+    public ClaimService(ProfessionalClaimMapper professionalClaimMapper, DentalClaimMapper dentalClaimMapper) {
+        this.professionalClaimMapper = professionalClaimMapper;
+        this.dentalClaimMapper = dentalClaimMapper;
+    }
+
+    public ClaimDetailsReply processProfessionalClaim(com.p.Transaction837 transaction837) {
+        return professionalClaimMapper.toProfessionalClaimsDetails(transaction837);
+    }
+
+    public ClaimDetailsReply processDentalClaim(com.d.Transaction837 transaction837) {
+        return dentalClaimMapper.toDentalClaimsDetails(transaction837);
+    }
+}
+```
+
+---
+
+### **🚀 Why This Approach Works Best**
+✅ **No modification of `Transaction837`** → It remains untouched.  
+✅ **Abstract class avoids duplication** → `extractSubmitterId` and `extractClaimId` are reused.  
+✅ **Supports multiple packages** → Works for both `com.p.Transaction837` and `com.d.Transaction837`.  
+✅ **Spring Boot compatible** → `@Mapper(componentModel = "spring")` ensures proper dependency injection.  
+
+---
+
+### **📌 Summary**
+1. **Created an abstract class (`AbstractClaimMapper`)** to handle both versions of `Transaction837`.  
+2. **Extended it in two concrete mappers (`ProfessionalClaimMapper` and `DentalClaimMapper`)** to support different packages.  
+3. **Injected both mappers into a service (`ClaimService`)** to process claims dynamically.  
+
+This ensures **clean architecture** while handling multiple packages efficiently. 🚀 Let me know if you need refinements! 😊
