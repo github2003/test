@@ -349,3 +349,45 @@ public class ClaimService {
 3. **Injected both mappers into a service (`ClaimService`)** to process claims dynamically.  
 
 This ensures **clean architecture** while handling multiple packages efficiently. 🚀 Let me know if you need refinements! 😊
+
+
+
+
+public interface Transaction837Adapter {
+    String getSubmitterId();
+    String getClaimId();
+}
+
+@Mapper(componentModel = "spring")
+public interface ClaimResponseMapping {
+
+    @Mapping(target = "claimDetails", source = "transaction837", qualifiedByName = "mapClaimDetailsList")
+    ClaimDetailsReply toProfessionalClaimsDetails(com.p.Transaction837 transaction837);
+
+    @Mapping(target = "claimDetails", source = "transaction837", qualifiedByName = "mapClaimDetailsList")
+    ClaimDetailsReply toDentalClaimsDetails(com.d.Transaction837 transaction837);
+
+    @Named("mapClaimDetailsList")
+    default List<ClaimDetails> mapClaimDetailsList(Object transaction837) {
+        Transaction837Adapter adapter = adapt(transaction837);
+        ClaimDetails claimDetails = new ClaimDetails();
+        claimDetails.setSubmitterid(adapter.getSubmitterId());
+        claimDetails.setClaimid(adapter.getClaimId());
+        return List.of(claimDetails);
+    }
+
+    default Transaction837Adapter adapt(Object transaction837) {
+        if (transaction837 instanceof com.p.Transaction837 pro) {
+            return new Transaction837Adapter() {
+                @Override public String getSubmitterId() { return pro.getSubmitterId(); }
+                @Override public String getClaimId() { return pro.getClaimId(); }
+            };
+        } else if (transaction837 instanceof com.d.Transaction837 den) {
+            return new Transaction837Adapter() {
+                @Override public String getSubmitterId() { return den.getSubmitterId(); }
+                @Override public String getClaimId() { return den.getClaimId(); }
+            };
+        }
+        throw new IllegalArgumentException("Unsupported Transaction837 type");
+    }
+}
