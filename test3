@@ -188,4 +188,24 @@ public interface ClaimResponseMapping {
     ClaimDetailsReply toProfesionalClaimsDetals(Transaction837 transaction837);
 }
 
+@Mapper(componentModel = "spring", uses = ClaimResponseMappingUtil.class)
+public interface ClaimResponseMapping {
+
+    @Mapping(target = "claimDetails", source = "transaction837", qualifiedByName = "mapClaimDetailsList")
+    ClaimDetailsReply toProfesionalClaimsDetals(Transaction837 transaction837);
+
+    @Named("mapClaimDetailsList")
+    default List<ClaimDetails> mapClaimDetailsList(Transaction837 transaction837) {
+        ClaimDetails claimDetails = new ClaimDetails();
+        
+        // Set submitterid
+        claimDetails.setSubmitterid(ClaimResponseMappingUtil.getSubmitterId(transaction837));
+
+        // Set claimid
+        claimDetails.setClaimid(ClaimResponseMappingUtil.getClaimId(transaction837));
+
+        return List.of(claimDetails);
+    }
+}
+
 
