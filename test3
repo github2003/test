@@ -797,3 +797,106 @@ public interface ClaimResponseMapping {
         <Element-329>0028</Element-329>
     </Segment-SE>
 </Transaction-837>
+package com.example.xmlparser;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+import java.io.File;
+
+public class XmlParser {
+
+    public static Document loadXmlFile(String filePath) {
+        try {
+            File file = new File(filePath);
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            factory.setNamespaceAware(true);
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            return builder.parse(file);
+        } catch (Exception e) {
+            throw new RuntimeException("Error loading XML file", e);
+        }
+    }
+
+    public static String getElementValue(Document document, String expression) {
+        try {
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            XPathExpression xPathExpression = xPath.compile(expression);
+            return xPathExpression.evaluate(document);
+        } catch (Exception e) {
+            throw new RuntimeException("Error parsing XML element", e);
+        }
+    }
+
+    public static void printAllElements(Document document, String expression) {
+        try {
+            XPath xPath = XPathFactory.newInstance().newXPath();
+            XPathExpression xPathExpression = xPath.compile(expression);
+            NodeList nodeList = (NodeList) xPathExpression.evaluate(document, XPathConstants.NODESET);
+
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                Node node = nodeList.item(i);
+                System.out.println(node.getNodeName() + ": " + node.getTextContent());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Error printing XML elements", e);
+        }
+    }
+
+    public static void main(String[] args) {
+        Document document = loadXmlFile("sample.xml");
+
+        // Read specific element
+        String value = getElementValue(document, "//Segment-ST/Element-329");
+        System.out.println("Element-329 Value: " + value);
+
+        // Print all elements inside Segment-BHT
+        printAllElements(document, "//Segment-BHT/*");
+    }
+}
+
+
+
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.events.StartElement;
+import javax.xml.stream.events.XMLEvent;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
+public class FastXmlParser {
+    public static void main(String[] args) {
+        String filePath = "input.xml"; // Change this to your XML file path
+        String elementToFind = "Element-329"; // Change this to the element you need
+        parseXml(filePath, elementToFind);
+    }
+
+    public static void parseXml(String filePath, String elementName) {
+        try (InputStream inputStream = new FileInputStream(filePath)) {
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            XMLEventReader reader = factory.createXMLEventReader(inputStream);
+
+            while (reader.hasNext()) {
+                XMLEvent event = reader.nextEvent();
+
+                if (event.isStartElement()) {
+                    StartElement startElement = event.asStartElement();
+                    if (startElement.getName().getLocalPart().equals(elementName)) {
+                        event = reader.nextEvent();
+                        System.out.println("Found " + elementName + " : " + event.asCharacters().getData());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
