@@ -165,4 +165,17 @@ CI/CD pipeline builds and deploys successfully.
 Service is up and running after deployment.
 
 
+@Mapping(target = "submitterid", source = "transaction837")
+default String mapSubmitterId(Transaction837 transaction837) {
+    if (transaction837 == null || transaction837.getInternalProperties() == null) {
+        return null;
+    }
+
+    return transaction837.getInternalProperties().getDatastructures().stream()
+        .flatMap(ds -> ds.getLookup().stream())
+        .filter(lookup -> "InterchangeSenderID".equals(lookup.getName()))
+        .map(Lookup::getValue)
+        .findFirst()
+        .orElse(null);
+}
 
