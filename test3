@@ -391,3 +391,33 @@ public interface ClaimResponseMapping {
         throw new IllegalArgumentException("Unsupported Transaction837 type");
     }
 }
+
+
+<plugin>
+    <groupId>org.codehaus.mojo</groupId>
+    <artifactId>jaxb2-maven-plugin</artifactId>
+    <version>2.5.0</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>generate</goal>
+            </goals>
+        </execution>
+    </executions>
+    <configuration>
+        <schemaDirectory>${project.basedir}/src/main/resources/xsd</schemaDirectory>
+        <outputDirectory>${project.build.directory}/generated-sources/xjc</outputDirectory>
+        <removeOldOutput>true</removeOldOutput>
+        <noFileComment>true</noFileComment> <!-- Removes comments -->
+        <args>
+            <arg>-no-header</arg> <!-- Also removes the generated header -->
+        </args>
+        <xjcArgs>
+            <xjcArg>-Xno-annotations</xjcArg> <!-- Removes all XML annotations -->
+        </xjcArgs>
+        <bindingFiles>
+            <bindingFile>${project.basedir}/src/main/resources/jaxb-bindings.xjb</bindingFile>
+        </bindingFiles>
+    </configuration>
+</plugin>
+
