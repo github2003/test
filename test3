@@ -179,3 +179,13 @@ default String mapSubmitterId(Transaction837 transaction837) {
         .orElse(null);
 }
 
+@Mapper
+public interface ClaimResponseMapping {
+
+    @Mapping(target = "submitterid", expression = "java(ClaimResponseMappingUtil.getSubmitterId(transaction837))")
+    @Mapping(target = "claimid", expression = "java(ClaimResponseMappingUtil.getClaimId(transaction837))")
+    @Mapping(target = "providerClaimNumber", expression = "java(ClaimResponseMappingUtil.getProviderClaimNumber(transaction837))")
+    ClaimDetailsReply toProfesionalClaimsDetals(Transaction837 transaction837);
+}
+
+
