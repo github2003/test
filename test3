@@ -421,3 +421,379 @@ public interface ClaimResponseMapping {
     </configuration>
 </plugin>
 
+<?xml version="1.0" encoding="UTF-8"?>
+<Transaction-837 xmlns="http://www.edifecs.com/xdata/200" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 XDataVersion="2.0" Standard="HIPAA" Version="V5010X222A1" GUID="{2E17F6A8-CBE9-4D03-BC76-E2408D1DCC67}"
+                 CreatedBy="javaXE" CreatedDate="2024-05-22T13:51:47">
+    <Internal-Properties>
+        <Data-Structure Name="Interchange">
+            <Lookup Name="TPM_Direction">Inbound</Lookup>
+            <Lookup Name="InterchangeUsageIndicator">T</Lookup>
+            <Lookup Name="Standard">X12</Lookup>
+            <Lookup Name="InterchangeSenderQual">ZZ</Lookup>
+            <Lookup Name="InterchangeSenderID">EFENEPREDI</Lookup>
+            <Lookup Name="InterchangeReceiverQual">ZZ</Lookup>
+            <Lookup Name="InterchangeReceiverID">00200</Lookup>
+            <Lookup Name="InterchangeControlVersion">00501</Lookup>
+            <Lookup Name="TPM_Mode">Batch</Lookup>
+            <Property Name="TPM_Direction">Inbound</Property>
+            <Property Name="Standard">X12</Property>
+            <Property Name="SplitFile">true</Property>
+            <Property Name="MissingREFD9">{Prp[MissingREFD9]}</Property>
+            <Property Name="PartnerEnv">Test</Property>
+            <Property Name="InterchangeChildCount">1</Property>
+            <Property Name="InterchangeTrailerControlNumber">120044910</Property>
+            <Property Name="SubelementDelimiter">0x7c</Property>
+            <Property Name="SegmentDelimiter">0x7e</Property>
+            <Property Name="ElementDelimiter">0x2a</Property>
+            <Property Name="RepeatingSeparator">0x5e</Property>
+            <Property Name="BatchType">NEHEN</Property>
+            <Property Name="TPTransport">PMASP.HRBDR.B2B.EFExRESP(+1)</Property>
+            <Property Name="TPM_SenderPartnerSID">211239</Property>
+            <Property Name="TPM_ReceiverPartnerSID">100001</Property>
+            <Property Name="InterchangeAuthorizationInfoQual">00</Property>
+            <Property Name="TPM_OriginatorPartnerSID">211239</Property>
+            <Property Name="InterchangeAuthorizationInfo"></Property>
+            <Property Name="TPM_DestinationPartnerSID">100001</Property>
+            <Property Name="InterchangeSecurityInfoQual">00</Property>
+            <Property Name="TPName"/>
+            <Property Name="InterchangeSecurityInfo"></Property>
+            <Property Name="InterchangeAckInvalid">None</Property>
+            <Property Name="InterchangeSenderQual">ZZ</Property>
+            <Property Name="GroupAckChildInvalid">None</Property>
+            <Property Name="InterchangeSenderID">EFENEPREDI</Property>
+            <Property Name="InterchangeReceiverQual">ZZ</Property>
+            <Property Name="InterchangeReceiverID">00200</Property>
+            <Property Name="InterchangeDate">240522</Property>
+            <Property Name="InterchangeTime">1021</Property>
+            <Property Name="InterchangeControlStandard_RepeatingSeparator">^</Property>
+            <Property Name="InterchangeControlVersion">00501</Property>
+            <Property Name="InterchangeControlNumber">120044910</Property>
+            <Property Name="InterchangeAckRequested">1</Property>
+            <Property Name="InterchangeUsageIndicator">T</Property>
+            <Property Name="InterchangeComponentElementSep">0x7c</Property>
+            <Property Name="TPM_Mode">Batch</Property>
+            <Data-Structure Name="Group">
+                <Lookup Name="GroupSenderID">EFENEPREDI</Lookup>
+                <Lookup Name="GroupReceiverID">00200</Lookup>
+                <Lookup Name="GroupVersionNumber">005010X222A1</Lookup>
+                <Property Name="TPM_SenderPartnerSID">211239</Property>
+                <Property Name="TPM_ReceiverPartnerSID">100001</Property>
+                <Property Name="TPM_OriginatorPartnerSID">211239</Property>
+                <Property Name="GroupChildCount">1</Property>
+                <Property Name="TPM_DestinationPartnerSID">100001</Property>
+                <Property Name="GroupTrailerControlNumber">120044910</Property>
+                <Property Name="TPName"/>
+                <Property Name="TPM_TradeRelationshipSID">101568</Property>
+                <Property Name="GroupID">HC</Property>
+                <Property Name="AckChildInvalid">None</Property>
+                <Property Name="GroupSenderID">EFENEPREDI</Property>
+                <Property Name="GroupReceiverID">00200</Property>
+                <Property Name="GroupDate">20240522</Property>
+                <Property Name="GroupTime">1021</Property>
+                <Property Name="GroupControlNumber">120044910</Property>
+                <Property Name="GroupAgencyCode">X</Property>
+                <Property Name="GroupVersionNumber">005010X222A1</Property>
+                <Data-Structure Name="Transaction">
+                    <Lookup Name="TransactionPurposeCode">00</Lookup>
+                    <Lookup Name="TransactionID">837</Lookup>
+                    <Property Name="TransactionChildCount">33</Property>
+                    <Property Name="TPM_SenderPartnerSID">211239</Property>
+                    <Property Name="TransactionTrailerControlNumber">0028</Property>
+                    <Property Name="TPM_ReceiverPartnerSID">100001</Property>
+                    <Property Name="TPM_OriginatorPartnerSID">211239</Property>
+                    <Property Name="TPM_TradeRelationshipSID">101568</Property>
+                    <Property Name="TPM_DestinationPartnerSID">100001</Property>
+                    <Property Name="TPName"/>
+                    <Property Name="TransactionPurposeCode">00</Property>
+                    <Property Name="TransactionID">837</Property>
+                    <Property Name="TransactionControlNumber">0028</Property>
+                    <Property Name="TransactionImplementationReference">005010X222A1</Property>
+                </Data-Structure>
+            </Data-Structure>
+        </Data-Structure>
+    </Internal-Properties>
+    <Segment-ST>
+        <Element-143>837</Element-143>
+        <Element-329>0028</Element-329>
+        <Element-1705>005010X222A1</Element-1705>
+    </Segment-ST>
+    <Segment-BHT>
+        <Element-1005>0019</Element-1005>
+        <Element-353>00</Element-353>
+        <Element-127>837TOOL</Element-127>
+        <Element-373>20240522</Element-373>
+        <Element-337>1125</Element-337>
+        <Element-640>CH</Element-640>
+    </Segment-BHT>
+    <Loop-1000A>
+        <Segment-NM1>
+            <Element-98>41</Element-98>
+            <Element-1065>2</Element-1065>
+            <Element-1035>837TOOL</Element-1035>
+            <Element-1036 xsi:nil="true"/>
+            <Element-1037 xsi:nil="true"/>
+            <Element-1038 xsi:nil="true"/>
+            <Element-1039 xsi:nil="true"/>
+            <Element-66>46</Element-66>
+            <Element-67>EFENEPREDI</Element-67>
+        </Segment-NM1>
+        <Segment-PER>
+            <Element-366>IC</Element-366>
+            <Element-93 xsi:nil="true"/>
+            <Element-365>TE</Element-365>
+            <Element-364>6172465000</Element-364>
+        </Segment-PER>
+    </Loop-1000A>
+    <Loop-1000B>
+        <Segment-NM1>
+            <Element-98>40</Element-98>
+            <Element-1065>2</Element-1065>
+            <Element-1035>MASS BLUE SHIELD</Element-1035>
+            <Element-1036 xsi:nil="true"/>
+            <Element-1037 xsi:nil="true"/>
+            <Element-1038 xsi:nil="true"/>
+            <Element-1039 xsi:nil="true"/>
+            <Element-66>46</Element-66>
+            <Element-67>00200</Element-67>
+        </Segment-NM1>
+    </Loop-1000B>
+    <Loop-2000A>
+        <Segment-HL>
+            <Element-628>1</Element-628>
+            <Element-734 xsi:nil="true"/>
+            <Element-735>20</Element-735>
+            <Element-736>1</Element-736>
+        </Segment-HL>
+        <Loop-2010AA>
+            <Segment-NM1>
+                <Element-98>85</Element-98>
+                <Element-1065>1</Element-1065>
+                <Element-1035>837 TEST TOOL</Element-1035>
+                <Element-1036>837 TEST TOOL</Element-1036>
+                <Element-1037 xsi:nil="true"/>
+                <Element-1038 xsi:nil="true"/>
+                <Element-1039 xsi:nil="true"/>
+                <Element-66>XX</Element-66>
+                <Element-67>1992897656</Element-67>
+            </Segment-NM1>
+            <Segment-N3>
+                <Element-166>ADDRESS 1</Element-166>
+                <Element-166_1>ADDRESS 2</Element-166_1>
+            </Segment-N3>
+            <Segment-N4>
+                <Element-19>WATERTOWN</Element-19>
+                <Element-156>MA</Element-156>
+                <Element-116>02472</Element-116>
+            </Segment-N4>
+            <Segment-REF>
+                <Element-128>EI</Element-128>
+                <Element-127>043519473</Element-127>
+            </Segment-REF>
+        </Loop-2010AA>
+    </Loop-2000A>
+    <Loop-2000B>
+        <Segment-HL>
+            <Element-628>2</Element-628>
+            <Element-734>1</Element-734>
+            <Element-735>22</Element-735>
+            <Element-736>0</Element-736>
+        </Segment-HL>
+        <Segment-SBR>
+            <Element-1138>P</Element-1138>
+            <Element-1069>18</Element-1069>
+            <Element-127 xsi:nil="true"/>
+            <Element-93 xsi:nil="true"/>
+            <Element-1336 xsi:nil="true"/>
+            <Element-1143 xsi:nil="true"/>
+            <Element-1073 xsi:nil="true"/>
+            <Element-584 xsi:nil="true"/>
+            <Element-1032>BL</Element-1032>
+        </Segment-SBR>
+        <Loop-2010BA>
+            <Segment-NM1>
+                <Element-98>IL</Element-98>
+                <Element-1065>1</Element-1065>
+                <Element-1035>ANN</Element-1035>
+                <Element-1036>SALLY</Element-1036>
+                <Element-1037 xsi:nil="true"/>
+                <Element-1038 xsi:nil="true"/>
+                <Element-1039 xsi:nil="true"/>
+                <Element-66>MI</Element-66>
+                <Element-67>XXP303590005</Element-67>
+            </Segment-NM1>
+            <Segment-N3>
+                <Element-166>ADDRESS 1</Element-166>
+                <Element-166_1>ADDRESS 2</Element-166_1>
+            </Segment-N3>
+            <Segment-N4>
+                <Element-19>WATERTOWN</Element-19>
+                <Element-156>MA</Element-156>
+                <Element-116>02472</Element-116>
+            </Segment-N4>
+            <Segment-DMG>
+                <Element-1250>D8</Element-1250>
+                <Element-1251>19790101</Element-1251>
+                <Element-1068>F</Element-1068>
+            </Segment-DMG>
+        </Loop-2010BA>
+        <Loop-2010BB>
+            <Segment-NM1>
+                <Element-98>PR</Element-98>
+                <Element-1065>2</Element-1065>
+                <Element-1035>BCBS</Element-1035>
+                <Element-1036 xsi:nil="true"/>
+                <Element-1037 xsi:nil="true"/>
+                <Element-1038 xsi:nil="true"/>
+                <Element-1039 xsi:nil="true"/>
+                <Element-66>PI</Element-66>
+                <Element-67>00200</Element-67>
+            </Segment-NM1>
+            <Segment-REF>
+                <Element-128>EI</Element-128>
+                <Element-127>043519473</Element-127>
+            </Segment-REF>
+        </Loop-2010BB>
+        <Loop-2300>
+            <Segment-CLM>
+                <Element-1028>052224Z45784Z5048</Element-1028>
+                <Element-782>2250</Element-782>
+                <Element-1032 xsi:nil="true"/>
+                <Element-1343 xsi:nil="true"/>
+                <Composite-C023>
+                    <Element-1331>12</Element-1331>
+                    <Element-1332>B</Element-1332>
+                    <Element-1325>1</Element-1325>
+                </Composite-C023>
+                <Element-1073>Y</Element-1073>
+                <Element-1359>A</Element-1359>
+                <Element-1073_1>Y</Element-1073_1>
+                <Element-1363>Y</Element-1363>
+            </Segment-CLM>
+            <Segment-HI>
+                <Composite-C022>
+                    <Element-1270>ABK</Element-1270>
+                    <Element-1271>E119</Element-1271>
+                </Composite-C022>
+            </Segment-HI>
+            <Loop-2400>
+                <Segment-LX>
+                    <Element-554>1</Element-554>
+                </Segment-LX>
+                <Segment-SV1>
+                    <Composite-C003>
+                        <Element-235>HC</Element-235>
+                        <Element-234>A4416</Element-234>
+                        <Element-1339>NU</Element-1339>
+                    </Composite-C003>
+                    <Element-782>750</Element-782>
+                    <Element-355>UN</Element-355>
+                    <Element-380>1</Element-380>
+                    <Element-1331 xsi:nil="true"/>
+                    <Element-1365 xsi:nil="true"/>
+                    <Composite-C004>
+                        <Element-1328>1</Element-1328>
+                    </Composite-C004>
+                </Segment-SV1>
+                <Segment-DTP>
+                    <Element-374>472</Element-374>
+                    <Element-1250>RD8</Element-1250>
+                    <Element-1251>20241008-20241008</Element-1251>
+                </Segment-DTP>
+                <Loop-2420A>
+                    <Segment-NM1>
+                        <Element-98>82</Element-98>
+                        <Element-1065>1</Element-1065>
+                        <Element-1035>837 TEST TOOL</Element-1035>
+                        <Element-1036>837 TEST TOOL</Element-1036>
+                        <Element-1037 xsi:nil="true"/>
+                        <Element-1038 xsi:nil="true"/>
+                        <Element-1039 xsi:nil="true"/>
+                        <Element-66>XX</Element-66>
+                        <Element-67>1992897656</Element-67>
+                    </Segment-NM1>
+                </Loop-2420A>
+            </Loop-2400>
+            <Loop-2400>
+                <Segment-LX>
+                    <Element-554>2</Element-554>
+                </Segment-LX>
+                <Segment-SV1>
+                    <Composite-C003>
+                        <Element-235>HC</Element-235>
+                        <Element-234>E0784</Element-234>
+                        <Element-1339>NU</Element-1339>
+                    </Composite-C003>
+                    <Element-782>750</Element-782>
+                    <Element-355>UN</Element-355>
+                    <Element-380>1</Element-380>
+                    <Element-1331 xsi:nil="true"/>
+                    <Element-1365 xsi:nil="true"/>
+                    <Composite-C004>
+                        <Element-1328>1</Element-1328>
+                    </Composite-C004>
+                </Segment-SV1>
+                <Segment-DTP>
+                    <Element-374>472</Element-374>
+                    <Element-1250>RD8</Element-1250>
+                    <Element-1251>20241008-20241008</Element-1251>
+                </Segment-DTP>
+                <Loop-2420A>
+                    <Segment-NM1>
+                        <Element-98>82</Element-98>
+                        <Element-1065>1</Element-1065>
+                        <Element-1035>837 TEST TOOL</Element-1035>
+                        <Element-1036>837 TEST TOOL</Element-1036>
+                        <Element-1037 xsi:nil="true"/>
+                        <Element-1038 xsi:nil="true"/>
+                        <Element-1039 xsi:nil="true"/>
+                        <Element-66>XX</Element-66>
+                        <Element-67>1992897656</Element-67>
+                    </Segment-NM1>
+                </Loop-2420A>
+            </Loop-2400>
+            <Loop-2400>
+                <Segment-LX>
+                    <Element-554>3</Element-554>
+                </Segment-LX>
+                <Segment-SV1>
+                    <Composite-C003>
+                        <Element-235>HC</Element-235>
+                        <Element-234>A4230</Element-234>
+                        <Element-1339>NU</Element-1339>
+                    </Composite-C003>
+                    <Element-782>750</Element-782>
+                    <Element-355>UN</Element-355>
+                    <Element-380>1</Element-380>
+                    <Element-1331 xsi:nil="true"/>
+                    <Element-1365 xsi:nil="true"/>
+                    <Composite-C004>
+                        <Element-1328>1</Element-1328>
+                    </Composite-C004>
+                </Segment-SV1>
+                <Segment-DTP>
+                    <Element-374>472</Element-374>
+                    <Element-1250>RD8</Element-1250>
+                    <Element-1251>20241016-20241016</Element-1251>
+                </Segment-DTP>
+                <Loop-2420A>
+                    <Segment-NM1>
+                        <Element-98>82</Element-98>
+                        <Element-1065>1</Element-1065>
+                        <Element-1035>837 TEST TOOL</Element-1035>
+                        <Element-1036>837 TEST TOOL</Element-1036>
+                        <Element-1037 xsi:nil="true"/>
+                        <Element-1038 xsi:nil="true"/>
+                        <Element-1039 xsi:nil="true"/>
+                        <Element-66>XX</Element-66>
+                        <Element-67>1992897656</Element-67>
+                    </Segment-NM1>
+                </Loop-2420A>
+            </Loop-2400>
+        </Loop-2300>
+    </Loop-2000B>
+    <Segment-SE>
+        <Element-96>33</Element-96>
+        <Element-329>0028</Element-329>
+    </Segment-SE>
+</Transaction-837>
