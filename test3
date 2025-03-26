@@ -1,1 +1,2 @@
-
+ List<Item> itemList = Arrays.asList(objectMapper.treeToValue(loop2400Node, Item[].class));
+            response.setLoop2400(itemList);
