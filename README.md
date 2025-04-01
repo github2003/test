@@ -1,3 +1,0 @@
-Just to clarify, I don’t have any outstanding questions—my only request is straightforward: I need clear mapping for the Professional 837 XML fields to align with the requirement document. Without this, I can’t proceed with the parsing logic. I’ve been raising this for the past week, and I’d appreciate if the team could take ownership of providing the necessary details.
-
-I’m only concerned about the Professional 837 XML file, which I specified earlier. I can’t help much with field mapping since I’m unfamiliar with the healthcare domain. If I accidentally mentioned "not found" for other types like Institutional or Dental, please disregard that. I sent the document solely to determine why so many fields are not detected for Professional. Please verify it.
