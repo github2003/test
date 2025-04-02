@@ -1,0 +1,57 @@
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import java.io.File;
+import java.util.*;
+
+public class XmlParser {
+    public static void main(String[] args) {
+        try {
+            XmlMapper xmlMapper = new XmlMapper();
+            
+            // Read XML as JsonNode
+            JsonNode rootNode = xmlMapper.readTree(new File("input.xml"));
+            
+            // Navigate to Loop-2300
+            JsonNode loop2300Node = rootNode.at("/Loop-C/Loop-2300");
+            
+            // Map to store path:segment:element -> value
+            Map<String, String> extractedData = new HashMap<>();
+            
+            // Iterate over all Loop-2400 nodes
+            for (JsonNode loop2400Node : loop2300Node.findValues("Loop-2400")) {
+                // Start recursive parsing with initial path
+                parseNode(loop2400Node, "Loop-2400", extractedData);
+            }
+            
+            // Print extracted data
+            System.out.println("Extracted Data from Loop-2400 and nested nodes:");
+            extractedData.forEach((key, value) -> 
+                System.out.println(key + " -> " + value));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private static void parseNode(JsonNode node, String currentPath, Map<String, String> extractedData) {
+        // Iterate through all fields in the current node
+        node.fields().forEachRemaining(entry -> {
+            String key = entry.getKey();
+            JsonNode value = entry.getValue();
+            
+            // Build the new path
+            String newPath = currentPath + ":" + key;
+            
+            if (key.startsWith("segment-")) {
+                // If it's a segment, process its elements
+                value.fields().forEachRemaining(element -> {
+                    String elementPath = newPath + ":" + element.getKey();
+                    extractedData.put(elementPath, element.getValue().asText());
+                });
+            } else if (value.isObject()) {
+                // If it's an object (potential nested loop like Loop-2410), recurse
+                parseNode(value, newPath, extractedData);
+            }
+        });
+    }
+}
