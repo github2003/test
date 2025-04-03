@@ -37,39 +37,70 @@ public class XmlParser {
             return;
         }
 
-        // Handle different node types
         if (node.isObject()) {
-            // Object node: process fields
             node.fields().forEachRemaining(entry -> {
                 String key = entry.getKey();
                 JsonNode value = entry.getValue();
                 String newPath = currentPath + ":" + key;
                 
                 if (key.startsWith("segment-")) {
-                    // Segment node: extract elements
-                    if (value.isObject()) {
-                        value.fields().forEachRemaining(element -> {
-                            String elementPath = newPath + ":" + element.getKey();
-                            extractedData.put(elementPath, element.getValue().asText());
-                        });
-                    }
+                    // Handle segment nodes
+                    parseSegment(value, newPath, extractedData);
+                } else if (key.startsWith("Composite-")) {
+                    // Handle composite nodes
+                    parseComposite(value, newPath, extractedData);
                 } else {
-                    // Nested structure: recurse
+                    // Recurse into other object nodes (like Loop-2410)
                     parseNode(value, newPath, extractedData);
                 }
             });
         } else if (node.isArray()) {
-            // Array node: process each element
             for (int i = 0; i < node.size(); i++) {
                 JsonNode arrayElement = node.get(i);
                 String newPath = currentPath + "[" + i + "]";
                 parseNode(arrayElement, newPath, extractedData);
             }
         } else if (node.isValueNode()) {
-            // Value node: store the value if it's under a segment
-            if (currentPath.contains("segment-")) {
+            if (currentPath.contains("segment-") || currentPath.contains("Composite-")) {
                 extractedData.put(currentPath, node.asText());
             }
+        }
+    }
+    
+    private static void parseSegment(JsonNode segmentNode, String segmentPath, Map<String, String> extractedData) {
+        if (segmentNode.isObject()) {
+            segmentNode.fields().forEachRemaining(element -> {
+                String elementKey = element.getKey();
+                JsonNode elementValue = element.getValue();
+                String newPath = segmentPath + ":" + elementKey;
+                
+                if (elementKey.startsWith("Composite-")) {
+                    // Handle nested composite within segment
+                    parseComposite(elementValue, newPath, extractedData);
+                } else if (elementValue.isObject()) {
+                    // Recurse into any other nested objects
+                    parseNode(elementValue, newPath, extractedData);
+                } else if (elementValue.isValueNode()) {
+                    // Direct element value
+                    extractedData.put(newPath, elementValue.asText());
+                }
+            });
+        }
+    }
+    
+    private static void parseComposite(JsonNode compositeNode, String compositePath, Map<String, String> extractedData) {
+        if (compositeNode.isObject()) {
+            compositeNode.fields().forEachRemaining(element -> {
+                String elementPath = compositePath + ":" + element.getKey();
+                JsonNode elementValue = element.getValue();
+                
+                if (elementValue.isValueNode()) {
+                    extractedData.put(elementPath, elementValue.asText());
+                } else if (elementValue.isObject()) {
+                    // Recurse in case of deeper nesting
+                    parseNode(elementValue, elementPath, extractedData);
+                }
+            });
         }
     }
 }
