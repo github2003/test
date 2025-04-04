@@ -1,1 +1,216 @@
+If your project uses a parent POM (e.g., a corporate or custom parent instead of or in addition to `spring-boot-starter-parent`), it could be the source of the exclusions or misconfigurations causing `DataSourceAutoConfiguration` and `HibernateJpaAutoConfiguration` to be skipped. The parent POM can override dependency versions, add exclusions, or define properties that affect Spring Boot’s auto-configuration. Let’s check specific sections of your parent POM to identify and resolve the issue.
 
+---
+
+### What to Check in the Parent POM
+
+#### 1. **Parent Declaration**
+- Look at the `<parent>` section in your project’s `pom.xml`:
+  ```xml
+  <parent>
+      <groupId>com.example</groupId>
+      <artifactId>custom-parent</artifactId>
+      <version>1.0.0</version>
+  </parent>
+  ```
+- Note the `groupId`, `artifactId`, and `version`, then locate the parent POM file (e.g., `custom-parent-1.0.0.pom`) in your local Maven repository (`~/.m2/repository/com/example/custom-parent/1.0.0/`) or your project’s repository.
+
+#### 2. **Dependencies Section**
+- In the parent POM, check the `<dependencies>` or `<dependencyManagement>` section for:
+  - **Spring Boot Starters**:
+    ```xml
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+        <version>${spring-boot.version}</version>
+        <exclusions>
+            <exclusion>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-jdbc</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>
+    ```
+    - If `spring-boot-starter-jdbc` (which includes `DataSourceAutoConfiguration`) is excluded, the `DataSource` won’t be auto-configured.
+  - **Custom JPA Configurations**:
+    - Look for direct dependencies on `hibernate-core` or `jakarta.persistence-api` without `spring-boot-starter-data-jpa`. This might bypass Spring Boot’s JPA auto-configuration.
+
+#### 3. **Dependency Management**
+- Check the `<dependencyManagement>` section:
+  ```xml
+  <dependencyManagement>
+      <dependencies>
+          <dependency>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-dependencies</artifactId>
+              <version>${spring-boot.version}</version>
+              <type>pom</type>
+              <scope>import</scope>
+          </dependency>
+      </dependencies>
+  </dependencyManagement>
+  ```
+  - Ensure it imports `spring-boot-dependencies` (Spring Boot’s BOM) to manage versions. If it’s missing or overridden with custom versions, it could break auto-configuration.
+
+#### 4. **Properties**
+- Look for properties that disable auto-configuration:
+  ```xml
+  <properties>
+      <spring.autoconfigure.exclude>org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration</spring.autoconfigure.exclude>
+  </properties>
+  ```
+  - If present, this excludes the necessary auto-configurations, mirroring what your logs show.
+
+#### 5. **Plugins**
+- Check for plugins that might affect the build or classpath:
+  ```xml
+  <build>
+      <plugins>
+          <plugin>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-maven-plugin</artifactId>
+              <configuration>
+                  <excludes>
+                      <exclude>org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration</exclude>
+                  </excludes>
+              </configuration>
+          </plugin>
+      </plugins>
+  </build>
+  ```
+  - Rarely, exclusions can be specified here, though this is less common.
+
+#### 6. **Profiles**
+- Look for `<profiles>` that might conditionally exclude auto-configuration:
+  ```xml
+  <profiles>
+      <profile>
+          <id>no-jpa</id>
+          <properties>
+              <spring.autoconfigure.exclude>org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration</spring.autoconfigure.exclude>
+          </properties>
+      </profile>
+  </profiles>
+  ```
+  - If a profile is active (e.g., via `-Pno-jpa` or default activation), it could apply exclusions.
+
+---
+
+### Steps to Debug and Fix
+
+#### 1. Share Your Project’s `pom.xml`
+- First, check your project’s `pom.xml` (not the parent) and share it. Look for:
+  ```xml
+  <parent>
+      <groupId>...</groupId>
+      <artifactId>...</artifactId>
+      <version>...</version>
+  </parent>
+  ```
+  - This tells us the parent POM to investigate.
+
+#### 2. Inspect the Parent POM
+- Open the parent POM file and search for:
+  - `<spring.autoconfigure.exclude>` in `<properties>`.
+  - Exclusions in `<dependencies>` or `<dependencyManagement>` for `spring-boot-starter-jdbc` or `spring-boot-starter-data-jpa`.
+  - Any custom `<build>` or `<profiles>` configurations.
+
+#### 3. Run `mvn dependency:tree`
+- Execute:
+  ```bash
+  mvn dependency:tree -Dverbose
+  ```
+- Look for:
+  - `org.springframework.boot:spring-boot-starter-data-jpa` (should be present).
+  - `org.springframework.boot:spring-boot-starter-jdbc` (should not be excluded).
+  - `org.postgresql:postgresql` (should be present).
+- If `spring-boot-starter-jdbc` is excluded, it’s likely from the parent POM.
+
+#### 4. Check Effective POM
+- Generate the effective POM to see the combined configuration:
+  ```bash
+  mvn help:effective-pom > effective-pom.xml
+  ```
+- Open `effective-pom.xml` and search for:
+  - `<spring.autoconfigure.exclude>` (indicates exclusions from parent or properties).
+  - `<exclusions>` under `spring-boot-starter-data-jpa`.
+
+#### 5. Override Exclusions Locally
+If the parent POM is excluding `DataSourceAutoConfiguration` and `HibernateJpaAutoConfiguration`, you can override it in your project’s `pom.xml` or `application.properties`.
+
+- **In `application.properties`**:
+  ```properties
+  spring.autoconfigure.exclude= # Empty to override parent exclusions
+  ```
+- **In `pom.xml`** (if properties-based):
+  ```xml
+  <properties>
+      <spring.autoconfigure.exclude></spring.autoconfigure.exclude>
+  </properties>
+  ```
+
+#### 6. Test Without Parent Influence
+Temporarily switch to `spring-boot-starter-parent` to confirm the issue:
+```xml
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.2.4</version> <!-- Adjust to your version -->
+</parent>
+<dependencies>
+    <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <scope>runtime</scope>
+    </dependency>
+</dependencies>
+```
+
+- If this works, the parent POM is the culprit.
+
+---
+
+### Likely Fix
+Assuming the parent POM has:
+```xml
+<properties>
+    <spring.autoconfigure.exclude>org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration</spring.autoconfigure.exclude>
+</properties>
+```
+
+**Solution**:
+- Override it in your `pom.xml`:
+  ```xml
+  <properties>
+      <spring.autoconfigure.exclude></spring.autoconfigure.exclude> <!-- Clear the exclusion -->
+  </properties>
+  ```
+- Or, explicitly re-enable auto-configuration in your `@SpringBootApplication` (less common):
+  ```java
+  @SpringBootApplication
+  @Import({DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
+  public class SpringBootApp {
+      public static void main(String[] args) {
+          SpringApplication.run(SpringBootApp.class, args);
+      }
+  }
+  ```
+
+Run the app and check logs for:
+```
+DEBUG c.z.h.HikariDataSource - HikariPool-1 - Start completed.
+DEBUG o.s.o.j.JpaTransactionManager - Creating new EntityManagerFactory
+```
+
+---
+
+### Next Steps
+1. Share your project’s `pom.xml` (including the `<parent>` section).
+2. If possible, share the parent POM or run `mvn help:effective-pom` and check for exclusions.
+3. Test the override fix above and provide the new logs or errors.
+
+The parent POM is almost certainly applying these exclusions via properties or dependency management. Once we confirm the source, we can neutralize it effectively!
