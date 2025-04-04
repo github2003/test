@@ -1,26 +1,14 @@
 server:
   port: 8080
----
+
 spring:
   application:
     name: rpaextract
-logging:
-  level:
-    org.springframework: DEBUG
-    org.hibernate: DEBUG
-    org:hibernate.SQL: DEBUG
-    org.hibernate.type.descriptqor.sql: TRACE
- 
-    org.springframework.jdbc:  DEBUG
-    com.zaxxer.hikari: DEBUG
- 
-    org.postgresql: DEBUG
- 
   main:
-    allow-bean-definition-overriding : true
+    allow-bean-definition-overriding: true
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://mydomain.com/dedi?currentSchema=test
+    url: jdbc:postgresql://mydomain.com:5432/dedi?currentSchema=test
     username: xyxc
     password: abcd
     sql:
@@ -31,24 +19,29 @@ logging:
     properties:
       hibernate:
         format_sql: true
-      show-sql: true
-      database: postgresql
-      database-platform: org.hibernate.dialect.PostgreSQLDialect
- 
- 
- 
+        hbm2ddl.auto: update  # Added for schema management
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    org.springframework: DEBUG
+    org.hibernate: DEBUG
+    org.hibernate.SQL: DEBUG  # Fixed typo
+    org.hibernate.type.descriptor.sql: TRACE  # Fixed typo
+    org.springframework.jdbc: DEBUG
+    com.zaxxer.hikari: DEBUG
+    org.postgresql: DEBUG
+
 bcbsma:
   app:
     internalApiSecretToken: eQnZQLKXdSzGgMz
- 
+
 eureka:
   client:
     enabled: false
     register-with-eureka: false
     fetch-registry: false
- 
- 
----
+
 kafka:
   producer:
     topic: logging-topic
@@ -57,13 +50,15 @@ kafka:
     protocol: SASL_SSL
     mechanism: SCRAM-SHA-512
     jaas.config: ${vcap.services.info-api-credhub-service.credentials.kafka.jaasconfig:}
----
-#Add application specific properties for local development & testing
-#Spring-boot recommends using kebab-case/hyphen-case or camel-case and avoid using underscores for property names
-APP-CONFIG:
+
+app-config:  # Fixed case
   appName: rpa837-extract
   systemUser: DUMMY-USER
   systemPassword: DUMMY-PASSWORD
   envLbl: 'dev'
- 
-management.endpoints.web.exposure.include: '*'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
