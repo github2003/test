@@ -1,64 +1,62 @@
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-private static void parseNode(JsonNode node, String currentPath, List<Map<String, String>> allResults, Map<String, String> currentMap) {
-    if (node.isObject()) {
-        node.fields().forEachRemaining(entry -> {
-            String key = entry.getKey();
-            JsonNode childNode = entry.getValue();
-            String newPath = currentPath + ":" + key;
+import java.io.File;
+import java.util.*;
 
-            if (childNode.isValueNode()) {
-                currentMap.put(newPath, childNode.asText());
-            } else {
-                parseNode(childNode, newPath, allResults, currentMap);  // recursive call for composites
+public class UniversalXmlParser {
+
+    public static void main(String[] args) {
+        try {
+            File file = new File("input.xml");
+            XmlMapper xmlMapper = new XmlMapper();
+
+            JsonNode rootNode = xmlMapper.readTree(file);
+
+            // This will hold all maps of extracted data (each map represents one logical segment/subtree)
+            List<Map<String, String>> allExtractedData = new ArrayList<>();
+
+            // Start parsing with an empty path and empty map
+            parseNode(rootNode, "", allExtractedData, new HashMap<>());
+
+            // Print all parsed data
+            for (Map<String, String> dataMap : allExtractedData) {
+                System.out.println("---- Parsed Segment ----");
+                dataMap.forEach((key, value) -> System.out.println(key + " -> " + value));
             }
-        });
-    } else if (node.isArray()) {
-        int i = 0;
-        for (JsonNode arrayItem : node) {
-            parseNode(arrayItem, currentPath + "[" + i + "]", allResults, currentMap);
-            i++;
-        }
-    } else if (node.isValueNode()) {
-        currentMap.put(currentPath, node.asText());
-    }
-}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-List<Map<String, String>> refSegmentsPer2400 = new ArrayList<>();
-
-for (Map<String, String> record : allResults) {
-    boolean is2400 = false;
-    Map<String, String> refSegment = new LinkedHashMap<>();
-
-    for (Map.Entry<String, String> entry : record.entrySet()) {
-        String path = entry.getKey();
-        String value = entry.getValue();
-
-        if (path.contains("Loop-2400")) {
-            is2400 = true;
-
-            if (path.contains("segment-REF")) {
-                // You can refine this logic based on segment-REF_[n] or elements
-                refSegment.put(path, value);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    if (is2400 && !refSegment.isEmpty()) {
-        refSegmentsPer2400.add(refSegment);
+    private static void parseNode(JsonNode node, String currentPath,
+                                  List<Map<String, String>> allResults,
+                                  Map<String, String> currentMap) {
+
+        if (node == null || node.isMissingNode()) return;
+
+        if (node.isObject()) {
+            node.fields().forEachRemaining(entry -> {
+                String key = entry.getKey();
+                JsonNode child = entry.getValue();
+                String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;
+
+                if (child.isValueNode()) {
+                    currentMap.put(newPath, child.asText());
+                } else {
+                    parseNode(child, newPath, allResults, currentMap);
+                }
+            });
+        } else if (node.isArray()) {
+            for (int i = 0; i < node.size(); i++) {
+                JsonNode arrayNode = node.get(i);
+                Map<String, String> newMap = new LinkedHashMap<>();
+                parseNode(arrayNode, currentPath + "[" + i + "]", allResults, newMap);
+                allResults.add(newMap);
+            }
+        } else if (node.isValueNode()) {
+            currentMap.put(currentPath, node.asText());
+        }
     }
 }
