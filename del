@@ -1,34 +1,65 @@
-private static void parseNode(JsonNode node, String currentPath,
-                              List<Map<String, String>> allResults,
-                              Map<String, String> currentMap) {
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
-    if (node == null || node.isMissingNode()) return;
+import java.io.File;
+import java.util.*;
 
-    if (node.isObject()) {
-        node.fields().forEachRemaining(entry -> {
-            String key = entry.getKey();
-            JsonNode child = entry.getValue();
-            String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;
+public class GenericXmlExtractor {
 
-            // If key looks like a segment, grab its elements directly
-            if (key.toLowerCase().startsWith("segment-") && child.isObject()) {
-                child.fields().forEachRemaining(element -> {
-                    String elementPath = newPath + ":" + element.getKey();
-                    currentMap.put(elementPath, element.getValue().asText());
-                });
-            }
+    public static void main(String[] args) {
+        try {
+            XmlMapper xmlMapper = new XmlMapper();
+            JsonNode root = xmlMapper.readTree(new File("input.xml"));
 
-            // Recurse into child regardless — in case deeper nesting exists
-            parseNode(child, newPath, allResults, currentMap);
-        });
-    } else if (node.isArray()) {
-        for (int i = 0; i < node.size(); i++) {
-            JsonNode arrayNode = node.get(i);
-            Map<String, String> newMap = new LinkedHashMap<>();
-            parseNode(arrayNode, currentPath + "[" + i + "]", allResults, newMap);
-            allResults.add(newMap);
+            List<Map<String, String>> extractedList = new ArrayList<>();
+            Map<String, String> rootMap = new LinkedHashMap<>();
+            parseNode(root, "", extractedList, rootMap);
+
+            // Ensure root-level segments are not missed
+            if (!rootMap.isEmpty()) extractedList.add(rootMap);
+
+            // Print results
+            extractedList.forEach(record -> {
+                System.out.println("==== Record ====");
+                record.forEach((k, v) -> System.out.println(k + " => " + v));
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-    } else if (node.isValueNode()) {
-        currentMap.put(currentPath, node.asText());
+    }
+
+    private static void parseNode(JsonNode node, String currentPath,
+                                  List<Map<String, String>> allResults,
+                                  Map<String, String> currentMap) {
+        if (node == null || node.isMissingNode()) return;
+
+        if (node.isObject()) {
+            node.fields().forEachRemaining(entry -> {
+                String key = entry.getKey();
+                JsonNode child = entry.getValue();
+                String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;
+
+                if (key.toLowerCase().startsWith("segment-") && child.isObject()) {
+                    child.fields().forEachRemaining(element -> {
+                        String elementPath = newPath + ":" + element.getKey();
+                        currentMap.put(elementPath, element.getValue().asText());
+                    });
+                }
+
+                parseNode(child, newPath, allResults, currentMap);
+            });
+        } else if (node.isArray()) {
+            for (int i = 0; i < node.size(); i++) {
+                JsonNode arrayNode = node.get(i);
+                Map<String, String> arrayMap = new LinkedHashMap<>();
+                parseNode(arrayNode, currentPath + "[" + i + "]", allResults, arrayMap);
+                if (!arrayMap.isEmpty()) {
+                    allResults.add(arrayMap);
+                }
+            }
+        } else if (node.isValueNode()) {
+            currentMap.put(currentPath, node.asText());
+        }
     }
 }
