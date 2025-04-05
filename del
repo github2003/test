@@ -1,1 +1,64 @@
 
+private static void parseNode(JsonNode node, String currentPath, List<Map<String, String>> allResults, Map<String, String> currentMap) {
+    if (node.isObject()) {
+        node.fields().forEachRemaining(entry -> {
+            String key = entry.getKey();
+            JsonNode childNode = entry.getValue();
+            String newPath = currentPath + ":" + key;
+
+            if (childNode.isValueNode()) {
+                currentMap.put(newPath, childNode.asText());
+            } else {
+                parseNode(childNode, newPath, allResults, currentMap);  // recursive call for composites
+            }
+        });
+    } else if (node.isArray()) {
+        int i = 0;
+        for (JsonNode arrayItem : node) {
+            parseNode(arrayItem, currentPath + "[" + i + "]", allResults, currentMap);
+            i++;
+        }
+    } else if (node.isValueNode()) {
+        currentMap.put(currentPath, node.asText());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+List<Map<String, String>> refSegmentsPer2400 = new ArrayList<>();
+
+for (Map<String, String> record : allResults) {
+    boolean is2400 = false;
+    Map<String, String> refSegment = new LinkedHashMap<>();
+
+    for (Map.Entry<String, String> entry : record.entrySet()) {
+        String path = entry.getKey();
+        String value = entry.getValue();
+
+        if (path.contains("Loop-2400")) {
+            is2400 = true;
+
+            if (path.contains("segment-REF")) {
+                // You can refine this logic based on segment-REF_[n] or elements
+                refSegment.put(path, value);
+            }
+        }
+    }
+
+    if (is2400 && !refSegment.isEmpty()) {
+        refSegmentsPer2400.add(refSegment);
+    }
+}
