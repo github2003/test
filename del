@@ -1,76 +1,39 @@
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+public static List<Map<String, String>> filterByLoopPath(List<Map<String, String>> allMaps, String loopPath) {
+    String normalizedPath = loopPath.replace("/", ":").replaceAll("^:+", "");
 
-import java.io.File;
-import java.util.*;
+    List<Map<String, String>> filtered = new ArrayList<>();
 
-public class UniversalXmlParser {
+    for (Map<String, String> originalMap : allMaps) {
+        Map<String, String> matchingEntries = new LinkedHashMap<>();
 
-    public static void main(String[] args) {
-        try {
-            File file = new File("input.xml");
-            XmlMapper xmlMapper = new XmlMapper();
-
-            JsonNode rootNode = xmlMapper.readTree(file);
-
-            // List of all extracted segments as maps
-            List<Map<String, String>> allExtractedData = new ArrayList<>();
-
-            // Begin parsing the tree
-            parseNode(rootNode, "", allExtractedData, new LinkedHashMap<>());
-
-            // Print all parsed results
-            for (Map<String, String> dataMap : allExtractedData) {
-                System.out.println("---- Parsed Segment ----");
-                dataMap.forEach((key, value) -> System.out.println(key + " -> " + value));
+        for (Map.Entry<String, String> entry : originalMap.entrySet()) {
+            if (entry.getKey().startsWith(normalizedPath)) {
+                matchingEntries.put(entry.getKey(), entry.getValue());
             }
+        }
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (!matchingEntries.isEmpty()) {
+            filtered.add(matchingEntries);
         }
     }
 
-    private static void parseNode(JsonNode node, String currentPath,
-                                  List<Map<String, String>> allResults,
-                                  Map<String, String> currentMap) {
+    return filtered;
+}
 
-        if (node == null || node.isMissingNode()) return;
 
-        if (node.isObject()) {
-            boolean isLeafObject = true;
-            Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
 
-            while (fields.hasNext()) {
-                Map.Entry<String, JsonNode> entry = fields.next();
-                String key = entry.getKey();
-                JsonNode child = entry.getValue();
-                String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;
 
-                if (child.isValueNode()) {
-                    currentMap.put(newPath, child.asText());
-                } else {
-                    isLeafObject = false;
-                    parseNode(child, newPath, allResults, currentMap);
-                }
-            }
 
-            // If it's a nested object with values, treat it as one logical segment
-            if (!currentMap.isEmpty() && isLeafObject) {
-                allResults.add(new LinkedHashMap<>(currentMap));
-                currentMap.clear();
-            }
 
-        } else if (node.isArray()) {
-            for (int i = 0; i < node.size(); i++) {
-                JsonNode arrayNode = node.get(i);
-                Map<String, String> newMap = new LinkedHashMap<>();
-                parseNode(arrayNode, currentPath + "[" + i + "]", allResults, newMap);
-                if (!newMap.isEmpty()) {
-                    allResults.add(newMap);
-                }
-            }
-        } else if (node.isValueNode()) {
-            currentMap.put(currentPath, node.asText());
-        }
-    }
+
+Scanner scanner = new Scanner(System.in);
+System.out.println("Enter the loop path (e.g., /Loop-2000C/Loop-2300/Loop-2400):");
+String userPath = scanner.nextLine();
+
+List<Map<String, String>> result = filterByLoopPath(allExtractedData, userPath);
+
+System.out.println("\n--- Filtered Results for " + userPath + " ---");
+for (Map<String, String> dataMap : result) {
+    System.out.println("---- Matched Segment ----");
+    dataMap.forEach((key, value) -> System.out.println(key + " -> " + value));
 }
