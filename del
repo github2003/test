@@ -1,16 +1,32 @@
-if (loop2320Array != null && loop2320Array.isArray()) {
-    for (JsonNode loop2320Node : loop2320Array) {
-        Map<String, String> singleMap = new LinkedHashMap<>();
-        loop2320Node.fields().forEachRemaining(entry -> {
-            JsonNode value = entry.getValue();
-            if (value.isValueNode()) {
-                singleMap.put(entry.getKey(), value.asText());
-            } else if (value.isObject()) {
-                value.fields().forEachRemaining(subEntry -> {
-                    singleMap.put(entry.getKey() + ":" + subEntry.getKey(), subEntry.getValue().asText());
-                });
-            }
-        });
-        all2320Maps.add(singleMap);
+private static String extractLoop2320Key(String path) {
+    // Extract something like "Loop-2320[3]" from "/Loop-2300/Loop-2320[3]/Segment-REF/Element"
+    int index = path.indexOf("Loop-2320[");
+    if (index != -1) {
+        int end = path.indexOf("]", index);
+        return path.substring(index, end + 1); // e.g., Loop-2320[3]
+    }
+    return null;
+}
+
+
+// Grouped result
+Map<String, Map<String, String>> groupedBy2320 = new LinkedHashMap<>();
+
+for (Map<String, String> flatMap : parsedData) {
+    for (Map.Entry<String, String> entry : flatMap.entrySet()) {
+        String key = entry.getKey();
+        String value = entry.getValue();
+
+        // Extract the Loop-2320[i] identifier using regex
+        if (key.contains("Loop-2320[")) {
+            String groupKey = extractLoop2320Key(key); // e.g., "Loop-2320[0]"
+
+            // Put into that group's map
+            groupedBy2320.computeIfAbsent(groupKey, k -> new LinkedHashMap<>())
+                         .put(key, value);
+        }
     }
 }
+
+// Now you have a list of maps, each representing one Loop-2320 object
+List<Map<String, String>> loop2320Objects = new ArrayList<>(groupedBy2320.values());
