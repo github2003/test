@@ -1,26 +1,15 @@
+List<Map<String, String>> loop2320List = new ArrayList<>();
 
-public static List<Map<String, String>> extractLoop(String loopName, List<Map<String, String>> parsedData) {
-    List<Map<String, String>> result = new ArrayList<>();
-
-    parsedData.forEach(map -> {
-        // Temporary grouping by index
-        Map<String, Map<String, String>> groupedByIndex = new LinkedHashMap<>();
-
-        map.forEach((key, value) -> {
-            if (key.contains(loopName + "[")) {
-                // Extract index e.g. Loop-2420[0]
-                String indexPart = key.substring(key.indexOf(loopName + "[") + loopName.length());
-                String index = indexPart.substring(1, indexPart.indexOf("]")); // get '0' from '[0]'
-                String cleanedKey = key.substring(key.indexOf("]") + 2); // remove Loop-XXXX[0].
-
-                groupedByIndex
-                        .computeIfAbsent(index, k -> new LinkedHashMap<>())
-                        .put(cleanedKey, value);
+for (JsonNode loop2300Node : rootNode.findValues("Loop-2300")) {
+    for (JsonNode loop2320Node : loop2300Node.findValues("Loop-2320")) {
+        Map<String, String> dataMap = new LinkedHashMap<>();
+        loop2320Node.fields().forEachRemaining(entry -> {
+            if (entry.getValue().isValueNode()) {
+                dataMap.put(entry.getKey(), entry.getValue().asText());
+            } else {
+                // Optionally, flatten deeper nodes here
             }
         });
-
-        result.addAll(groupedByIndex.values());
-    });
-
-    return result;
+        loop2320List.add(dataMap);
+    }
 }
