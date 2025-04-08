@@ -1,15 +1,16 @@
-List<Map<String, String>> loop2320List = new ArrayList<>();
-
-for (JsonNode loop2300Node : rootNode.findValues("Loop-2300")) {
-    for (JsonNode loop2320Node : loop2300Node.findValues("Loop-2320")) {
-        Map<String, String> dataMap = new LinkedHashMap<>();
+if (loop2320Array != null && loop2320Array.isArray()) {
+    for (JsonNode loop2320Node : loop2320Array) {
+        Map<String, String> singleMap = new LinkedHashMap<>();
         loop2320Node.fields().forEachRemaining(entry -> {
-            if (entry.getValue().isValueNode()) {
-                dataMap.put(entry.getKey(), entry.getValue().asText());
-            } else {
-                // Optionally, flatten deeper nodes here
+            JsonNode value = entry.getValue();
+            if (value.isValueNode()) {
+                singleMap.put(entry.getKey(), value.asText());
+            } else if (value.isObject()) {
+                value.fields().forEachRemaining(subEntry -> {
+                    singleMap.put(entry.getKey() + ":" + subEntry.getKey(), subEntry.getValue().asText());
+                });
             }
         });
-        loop2320List.add(dataMap);
+        all2320Maps.add(singleMap);
     }
 }
