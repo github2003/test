@@ -1,75 +1,48 @@
-private static void parseNode(JsonNode node, String currentPath,
-                              List<Map<String, String>> allResults,
-                              Map<String, String> currentMap) {
+public static List<Map<String, String>> extractLoop(List<Map<String, String>> parsedList, String parentLoop, String targetLoop) {
+    List<Map<String, String>> result = new ArrayList<>();
 
-    if (node == null || node.isMissingNode()) return;
+    for (Map<String, String> flatMap : parsedList) {
+        // Group by parent loop index
+        Map<String, Map<String, String>> groupedByParent = new LinkedHashMap<>();
 
-    if (node.isObject()) {
-        Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
-        boolean isLeafObject = true;
+        for (Map.Entry<String, String> entry : flatMap.entrySet()) {
+            String path = entry.getKey();
+            String value = entry.getValue();
 
-        while (fields.hasNext()) {
-            Map.Entry<String, JsonNode> entry = fields.next();
-            String key = entry.getKey();
-            JsonNode child = entry.getValue();
+            if (!path.contains(parentLoop + "[")) continue;
 
-            // Check if it's a loop (based on name like "Loop-xxxx")
-            boolean isLoop = key.matches("(?i)^Loop-\\d+[A-Z]*$");
+            String parentKey = extractLoopIndexKey(path, parentLoop);
+            if (parentKey == null) continue;
 
-            if (child.isArray()) {
-                // Regular case: multiple nodes already in array
-                for (int i = 0; i < child.size(); i++) {
-                    JsonNode arrayNode = child.get(i);
-                    Map<String, String> newMap = new LinkedHashMap<>();
-                    String newPath = currentPath.isEmpty()
-                            ? key + "[" + i + "]"
-                            : currentPath + ":" + key + "[" + i + "]";
-                    parseNode(arrayNode, newPath, allResults, newMap);
-                    if (!newMap.isEmpty()) {
-                        allResults.add(newMap);
-                    }
-                }
-                isLeafObject = false;
-
-            } else if (isLoop && child.isObject()) {
-                // Singleton loop object, treat like array[0]
-                Map<String, String> newMap = new LinkedHashMap<>();
-                String newPath = currentPath.isEmpty()
-                        ? key + "[0]"
-                        : currentPath + ":" + key + "[0]";
-                parseNode(child, newPath, allResults, newMap);
-                if (!newMap.isEmpty()) {
-                    allResults.add(newMap);
-                }
-                isLeafObject = false;
-
-            } else if (child.isValueNode()) {
-                String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;
-                currentMap.put(newPath, child.asText());
-            } else {
-                // Regular nested object
-                String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;
-                parseNode(child, newPath, allResults, currentMap);
-                isLeafObject = false;
+            // Filter target loop or all under parent
+            if (targetLoop == null || path.contains(targetLoop)) {
+                groupedByParent
+                    .computeIfAbsent(parentKey, k -> new LinkedHashMap<>())
+                    .put(path, value);
             }
         }
 
-        if (!currentMap.isEmpty() && isLeafObject) {
-            allResults.add(new LinkedHashMap<>(currentMap));
-            currentMap.clear();
-        }
-
-    } else if (node.isArray()) {
-        for (int i = 0; i < node.size(); i++) {
-            JsonNode arrayNode = node.get(i);
-            Map<String, String> newMap = new LinkedHashMap<>();
-            parseNode(arrayNode, currentPath + "[" + i + "]", allResults, newMap);
-            if (!newMap.isEmpty()) {
-                allResults.add(newMap);
-            }
-        }
-
-    } else if (node.isValueNode()) {
-        currentMap.put(currentPath, node.asText());
+        result.addAll(groupedByParent.values());
     }
+
+    return result;
 }
+
+private static String extractLoopIndexKey(String path, String loopName) {
+    int loopStart = path.indexOf(loopName + "[");
+    if (loopStart == -1) return null;
+    int indexStart = loopStart + loopName.length() + 1;
+    int indexEnd = path.indexOf("]", indexStart);
+    if (indexEnd == -1) return null;
+    return loopName + "[" + path.substring(indexStart, indexEnd) + "]";
+}
+
+// Get all 2400 segments (2400E, 2400B, etc.)
+extractLoop(parsedList, "Loop-2400", null);
+
+// Get only 2400B under each 2400
+extractLoop(parsedList, "Loop-2400", "Loop-2400B");
+
+// Get only 2400E under each 2400
+extractLoop(parsedList, "Loop-2400", "Loop-2400E");
+
