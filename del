@@ -1,34 +1,5 @@
-public static Map<String, List<Map<String, String>>> groupByRootLoop(List<Map<String, String>> parsedList, String loopName) {
-    Map<String, List<Map<String, String>>> grouped = new LinkedHashMap<>();
-
-    for (Map<String, String> map : parsedList) {
-        // Look for the first key that starts with Loop-2400[...] and extract that index
-        String loopKey = map.keySet().stream()
-            .filter(k -> k.contains(loopName + "["))
-            .findFirst()
-            .map(k -> {
-                int idx = k.indexOf(loopName + "[");
-                int endIdx = k.indexOf("]", idx);
-                return k.substring(idx, endIdx + 1); // e.g., Loop-2400[0]
-            })
-            .orElse("UNKNOWN");
-
-        grouped.computeIfAbsent(loopKey, k -> new ArrayList<>()).add(map);
-    }
-
-    return grouped;
-}
-
-
-Map<String, List<Map<String, String>>> grouped = groupByRootLoop(parsedList, "Loop-2400");
-
-for (Map.Entry<String, List<Map<String, String>>> entry : grouped.entrySet()) {
-    String groupKey = entry.getKey(); // Loop-2400[0], Loop-2400[1], etc.
-    List<Map<String, String>> mapsForThisGroup = entry.getValue();
-
-    // Here, you can combine maps into one object or do whatever needed
-    System.out.println("Group: " + groupKey);
-    for (Map<String, String> m : mapsForThisGroup) {
-        System.out.println(m);
-    }
-}
+groupedMap.entrySet().stream()
+    .filter(entry -> !entry.getKey().equals("unknown"))
+    .forEach(entry -> {
+        // handle only clean groups
+    });
