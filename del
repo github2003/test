@@ -1,48 +1,34 @@
-public static List<Map<String, String>> extractLoop(List<Map<String, String>> parsedList, String parentLoop, String targetLoop) {
-    List<Map<String, String>> result = new ArrayList<>();
+public static Map<String, List<Map<String, String>>> groupByRootLoop(List<Map<String, String>> parsedList, String loopName) {
+    Map<String, List<Map<String, String>>> grouped = new LinkedHashMap<>();
 
-    for (Map<String, String> flatMap : parsedList) {
-        // Group by parent loop index
-        Map<String, Map<String, String>> groupedByParent = new LinkedHashMap<>();
+    for (Map<String, String> map : parsedList) {
+        // Look for the first key that starts with Loop-2400[...] and extract that index
+        String loopKey = map.keySet().stream()
+            .filter(k -> k.contains(loopName + "["))
+            .findFirst()
+            .map(k -> {
+                int idx = k.indexOf(loopName + "[");
+                int endIdx = k.indexOf("]", idx);
+                return k.substring(idx, endIdx + 1); // e.g., Loop-2400[0]
+            })
+            .orElse("UNKNOWN");
 
-        for (Map.Entry<String, String> entry : flatMap.entrySet()) {
-            String path = entry.getKey();
-            String value = entry.getValue();
-
-            if (!path.contains(parentLoop + "[")) continue;
-
-            String parentKey = extractLoopIndexKey(path, parentLoop);
-            if (parentKey == null) continue;
-
-            // Filter target loop or all under parent
-            if (targetLoop == null || path.contains(targetLoop)) {
-                groupedByParent
-                    .computeIfAbsent(parentKey, k -> new LinkedHashMap<>())
-                    .put(path, value);
-            }
-        }
-
-        result.addAll(groupedByParent.values());
+        grouped.computeIfAbsent(loopKey, k -> new ArrayList<>()).add(map);
     }
 
-    return result;
+    return grouped;
 }
 
-private static String extractLoopIndexKey(String path, String loopName) {
-    int loopStart = path.indexOf(loopName + "[");
-    if (loopStart == -1) return null;
-    int indexStart = loopStart + loopName.length() + 1;
-    int indexEnd = path.indexOf("]", indexStart);
-    if (indexEnd == -1) return null;
-    return loopName + "[" + path.substring(indexStart, indexEnd) + "]";
+
+Map<String, List<Map<String, String>>> grouped = groupByRootLoop(parsedList, "Loop-2400");
+
+for (Map.Entry<String, List<Map<String, String>>> entry : grouped.entrySet()) {
+    String groupKey = entry.getKey(); // Loop-2400[0], Loop-2400[1], etc.
+    List<Map<String, String>> mapsForThisGroup = entry.getValue();
+
+    // Here, you can combine maps into one object or do whatever needed
+    System.out.println("Group: " + groupKey);
+    for (Map<String, String> m : mapsForThisGroup) {
+        System.out.println(m);
+    }
 }
-
-// Get all 2400 segments (2400E, 2400B, etc.)
-extractLoop(parsedList, "Loop-2400", null);
-
-// Get only 2400B under each 2400
-extractLoop(parsedList, "Loop-2400", "Loop-2400B");
-
-// Get only 2400E under each 2400
-extractLoop(parsedList, "Loop-2400", "Loop-2400E");
-
