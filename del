@@ -1,1 +1,75 @@
-private  static void parseNode(JsonNode node, String currentPath,                        List<Map<String, String>> allResults,                        Map<String, String> currentMap) {    if (node == null || node.isMissingNode()) return;    if (node.isObject()) {        boolean isLeafObject = true;        Iterator<Map.Entry<String, JsonNode>> fields = node.fields();        while (fields.hasNext()) {            Map.Entry<String, JsonNode> entry = fields.next();            String key = entry.getKey();            JsonNode child = entry.getValue();            String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;            if (child.isValueNode()) {                currentMap.put(newPath, child.asText());            } else {                isLeafObject = false;                parseNode(child, newPath, allResults, currentMap);            }        }        // If it's a nested object with values, treat it as one logical segment        if (!currentMap.isEmpty() && isLeafObject) {            allResults.add(new LinkedHashMap<>(currentMap));            currentMap.clear();        }    } else if (node.isArray()) {        for (int i = 0; i < node.size(); i++) {            JsonNode arrayNode = node.get(i);            Map<String, String> newMap = new LinkedHashMap<>();            parseNode(arrayNode, currentPath+ "[" + i + "]", allResults, newMap);            if (!newMap.isEmpty()) {                allResults.add(newMap);            }        }    } else if (node.isValueNode()) {        currentMap.put(currentPath, node.asText());    }}
+private static void parseNode(JsonNode node, String currentPath,
+                              List<Map<String, String>> allResults,
+                              Map<String, String> currentMap) {
+
+    if (node == null || node.isMissingNode()) return;
+
+    if (node.isObject()) {
+        Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+        boolean isLeafObject = true;
+
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> entry = fields.next();
+            String key = entry.getKey();
+            JsonNode child = entry.getValue();
+
+            // Check if it's a loop (based on name like "Loop-xxxx")
+            boolean isLoop = key.matches("(?i)^Loop-\\d+[A-Z]*$");
+
+            if (child.isArray()) {
+                // Regular case: multiple nodes already in array
+                for (int i = 0; i < child.size(); i++) {
+                    JsonNode arrayNode = child.get(i);
+                    Map<String, String> newMap = new LinkedHashMap<>();
+                    String newPath = currentPath.isEmpty()
+                            ? key + "[" + i + "]"
+                            : currentPath + ":" + key + "[" + i + "]";
+                    parseNode(arrayNode, newPath, allResults, newMap);
+                    if (!newMap.isEmpty()) {
+                        allResults.add(newMap);
+                    }
+                }
+                isLeafObject = false;
+
+            } else if (isLoop && child.isObject()) {
+                // Singleton loop object, treat like array[0]
+                Map<String, String> newMap = new LinkedHashMap<>();
+                String newPath = currentPath.isEmpty()
+                        ? key + "[0]"
+                        : currentPath + ":" + key + "[0]";
+                parseNode(child, newPath, allResults, newMap);
+                if (!newMap.isEmpty()) {
+                    allResults.add(newMap);
+                }
+                isLeafObject = false;
+
+            } else if (child.isValueNode()) {
+                String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;
+                currentMap.put(newPath, child.asText());
+            } else {
+                // Regular nested object
+                String newPath = currentPath.isEmpty() ? key : currentPath + ":" + key;
+                parseNode(child, newPath, allResults, currentMap);
+                isLeafObject = false;
+            }
+        }
+
+        if (!currentMap.isEmpty() && isLeafObject) {
+            allResults.add(new LinkedHashMap<>(currentMap));
+            currentMap.clear();
+        }
+
+    } else if (node.isArray()) {
+        for (int i = 0; i < node.size(); i++) {
+            JsonNode arrayNode = node.get(i);
+            Map<String, String> newMap = new LinkedHashMap<>();
+            parseNode(arrayNode, currentPath + "[" + i + "]", allResults, newMap);
+            if (!newMap.isEmpty()) {
+                allResults.add(newMap);
+            }
+        }
+
+    } else if (node.isValueNode()) {
+        currentMap.put(currentPath, node.asText());
+    }
+}
