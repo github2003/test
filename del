@@ -1,1 +1,1 @@
-String cleanedKey = originalKey.replaceAll("\\[\\d+\\]", "");
+
